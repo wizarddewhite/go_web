@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+	  <title>{{.Title}}</title>
+	  {{template "common/header.html" .}}
+	</head>
+
+  	<body>
+	  {{template "common/navbar.html" .}}
+	  {{template "common/flash.html" .}}
+	  {{template "body" .}}
+
+	  <script type="text/javascript" src="https://cdn.staticfile.org/jquery/3.2.1/jquery.min.js"></script>
+	  <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+	  {{template "common/footer.html" .}}
+	</body>
+</html>

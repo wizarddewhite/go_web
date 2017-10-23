@@ -8,8 +8,16 @@ type MainController struct {
 	beego.Controller
 }
 
-func (c *MainController) Get() {
-	c.Data["Website"] = "beego.me"
-	c.Data["Email"] = "astaxie@gmail.com"
-	c.TplName = "index.tpl"
+func (this *MainController) Get() {
+	this.TplName = "home.html"
+	this.Data["Title"] = "WebFrame"
+	this.Data["IsHome"] = true
+	// get account information
+	getLoginUser(&this.Controller)
+	ck, err := this.Ctx.Request.Cookie("flash")
+	if err == nil {
+		this.Data["Flash"] = ck.Value
+		this.Ctx.SetCookie("flash", "", -1, "/")
+	}
+	beego.Trace("home/get")
 }

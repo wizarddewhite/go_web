@@ -1,0 +1,25 @@
+<div class="navbar navbar-default">
+    <div class="container">
+            <a class="navbar-brand" href="/">Web Frame</a>
+	    <div>
+	    <ul class="nav navbar-nav">
+		    {{if .IsAdmin}}
+		    <li {{if .IsCategory}}class="active"{{end}}><a href="/">Category</a></li>
+		    {{end}}
+	    </ul>
+	    </div>
+
+	    <div class="pull-right">
+            <ul class="nav navbar-nav">
+                    {{if .IsLogin}}
+                    <li><a href="/account">Account</a></li>
+                    <li><a href="/login?exit=true">Logout</a></li>
+                    {{else}}
+                    <li><a href="/account?reg=true">Register</a></li>
+                    <li><a href="/login?">Login</a></li>
+                    {{end}}
+            </ul>
+	    </div>
+    </div>
+</div>
+
