@@ -10,4 +10,5 @@ type MainController struct {
 
 func (c *MainController) Get() {
 	c.TplName = "index.tpl"
+	beego.Trace("test trace")
 }
