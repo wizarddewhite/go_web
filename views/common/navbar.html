@@ -2,9 +2,9 @@
     <div class="container">
             <a class="navbar-brand" href="/">Web</a>
 	    <ul class="nav navbar-nav">
-		    <li class="active"><a href="/">First</a></li>
-		    <li><a href="/category">Category</a></li>
-		    <li><a href="/topic">Post</a></li>
+		    <li {{if .IsHome}}class="active"{{end}}><a href="/">First</a></li>
+		    <li {{if .IsCategory}}class="active"{{end}}><a href="/category">Category</a></li>
+		    <li {{if .IsTopic}}class="active"{{end}}><a href="/topic">Post</a></li>
 	    </ul>
 
     </div>
