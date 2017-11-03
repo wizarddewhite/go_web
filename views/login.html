@@ -5,18 +5,38 @@
 <form method="POST" action="/login">
   <div class="form-group">
     <label>Account</label>
-    <input class="form-control" placeholder="Enter account" name="uname">
+    <input id="uname" class="form-control" placeholder="Enter account" name="uname">
   </div>
   <div class="form-group">
     <label>Password</label>
-    <input type="password" class="form-control" placeholder="Password" name="pwd">
+    <input id="pwd" type="password" class="form-control" placeholder="Password" name="pwd">
   </div>
   <div class="checkbox">
     <label>
       <input type="checkbox" name="autoLogin"> Remember me
     </label>
   </div>
-  <button type="submit" class="btn btn-default">Login</button>
+  <button type="submit" class="btn btn-default" onclick="return checkInput()">Login</button>
 </form>
+
+<script>
+function checkInput() {
+	var uname = document.getElementById("uname");
+
+	if (uname.value.length == 0) {
+		alert("Please input your user name");
+		return false;
+	}
+
+	var pwd = document.getElementById("pwd");
+
+	if (pwd.value.length == 0) {
+		alert("Please input your password");
+		return false;
+	}
+
+	return true;
+}
+</script>
 <div>
 {{end}}
