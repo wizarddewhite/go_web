@@ -7,15 +7,19 @@
 		<tr>
 			<th>#</th>
 			<th>name</th>
-			<th>count</th>
+			<th>used</th>
 		</tr>
 	</thead>
 	<tbody>
+		{{if .User}}
+		{{with .User}}
 		<tr>
-		<th>abc</th>
-		<th>a</th>
-		<th>jk</th>
+		<th>{{.Name}}</th>
+		<th>{{.PWD}}</th>
+		<th>{{.Used}}</th>
 		</tr>
+		{{end}}
+		{{end}}
 	</tbody>
 </table>
 <div>

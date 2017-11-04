@@ -12,6 +12,7 @@
 	    <div class="pull-right">
             <ul class="nav navbar-nav">
                     {{if .IsLogin}}
+                    <li><a href="/account">Account</a></li>
                     <li><a href="/login?exit=true">Logout</a></li>
                     {{else}}
                     <li><a href="/account?reg=true">Register</a></li>

@@ -90,7 +90,7 @@ type User struct {
 	Name  string `orm:"index"`
 	PWD   string
 	Total int64
-	Left  int64
+	Used  int64
 }
 
 func AddUser(name, pwd string) error {

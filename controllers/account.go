@@ -17,9 +17,18 @@ func (this *AccountController) Get() {
 	if isReg {
 		this.TplName = "account_reg.html"
 	} else {
+		ck, err := this.Ctx.Request.Cookie("uname")
+		if err == nil {
+			uname := ck.Value
+			user := models.GetUser(uname)
+			this.Data["User"] = user
+		} else {
+			this.Data["User"] = nil
+		}
 		this.TplName = "account.html"
 	}
 	this.Data["Title"] = "account"
+	this.Data["IsLogin"] = checkAccount(this.Ctx)
 }
 
 func (this *AccountController) Post() {
