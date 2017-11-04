@@ -2,6 +2,7 @@ package controllers
 
 import (
 	//	"fmt"
+	"web/models"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
@@ -32,8 +33,8 @@ func (this *LoginController) Post() {
 	pwd := this.Input().Get("pwd")
 	autoLogin := this.Input().Get("autoLogin") == "on"
 
-	if beego.AppConfig.String("uname") == uname &&
-		beego.AppConfig.String("pwd") == pwd {
+	user := models.GetUser(uname)
+	if user != nil && user.Name == uname && user.PWD == pwd {
 		maxAge := 0
 		if autoLogin {
 			maxAge = 1<<31 - 1
@@ -59,6 +60,6 @@ func checkAccount(ctx *context.Context) bool {
 	}
 	pwd := ck.Value
 
-	return beego.AppConfig.String("uname") == uname &&
-		beego.AppConfig.String("pwd") == pwd
+	user := models.GetUser(uname)
+	return user != nil && user.Name == uname && user.PWD == pwd
 }

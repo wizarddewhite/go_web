@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"os"
 	"path"
 	"strconv"
@@ -84,13 +85,56 @@ type Topic struct {
 	ReplyLastUserId int64
 }
 
+type User struct {
+	Id    int64
+	Name  string `orm:"index"`
+	PWD   string
+	Total int64
+	Left  int64
+}
+
+func AddUser(name, pwd string) error {
+	o := orm.NewOrm()
+
+	user := &User{
+		Name: name,
+		PWD:  pwd,
+	}
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == nil {
+		return errors.New("name already exist")
+	}
+
+	_, err = o.Insert(user)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func GetUser(name string) *User {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return nil
+	} else {
+		return user
+	}
+}
+
 func RegisterDB() {
 	if !com.IsExist(_DB_NAME) {
 		os.MkdirAll(path.Dir(_DB_NAME), os.ModePerm)
 		os.Create(_DB_NAME)
 	}
 
-	orm.RegisterModel(new(Category), new(Topic))
+	orm.RegisterModel(new(Category), new(Topic), new(User))
 	orm.RegisterDriver(_SQLITE3_DRIVER, orm.DRSqlite)
 	orm.RegisterDataBase("default", _SQLITE3_DRIVER, _DB_NAME, 10)
 }
