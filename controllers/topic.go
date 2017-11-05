@@ -32,13 +32,14 @@ func (this *TopicController) Post() {
 	title := this.Input().Get("title")
 	content := this.Input().Get("content")
 	tid := this.Input().Get("tid")
+	category := this.Input().Get("category")
 	beego.Trace(len(tid))
 
 	var err error
 	if len(tid) == 0 {
-		err = models.AddTopic(title, content)
+		err = models.AddTopic(title, category, content)
 	} else {
-		err = models.ModifyTopic(tid, title, content)
+		err = models.ModifyTopic(tid, title, category, content)
 	}
 
 	if err != nil {
