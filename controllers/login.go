@@ -2,7 +2,7 @@ package controllers
 
 import (
 	//	"fmt"
-	"web/models"
+	"go_web/models"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"

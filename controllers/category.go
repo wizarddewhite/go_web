@@ -5,7 +5,7 @@ import (
 
 	"github.com/astaxie/beego"
 
-	"web/models"
+	"go_web/models"
 )
 
 type CategoryController struct {

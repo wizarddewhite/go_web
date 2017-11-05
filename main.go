@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/orm"
-	"web/models"
-	_ "web/routers"
+	"go_web/models"
+	_ "go_web/routers"
 )
 
 func init() {
