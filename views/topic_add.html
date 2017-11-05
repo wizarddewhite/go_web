@@ -1,0 +1,20 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+<h1>Add Topic</h1>
+
+<form method="post" action="/topic/">
+	<div class="form-grouop">
+		<label>Title:</label>
+		<input type="text" name="title" class="form-control">
+	</div>
+	<div class="form-grouop">
+		<label>Content:</label>
+		<textarea name="content" cols="30" rows="10" class="form-control"></textarea>
+	</div>
+	<button type="submit" class="btn btn-default">Add</button>
+</form>
+
+</div>
+{{end}}

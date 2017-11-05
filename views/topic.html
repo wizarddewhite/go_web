@@ -1,0 +1,32 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+<h1>Topic List</h1>
+<a href="/topic/add" class="btn btn-default">Add Topic</a>
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>#</th>
+			<th>name</th>
+			<th>last update</th>
+			<th>view</th>
+			<th>replies</th>
+		</tr>
+	</thead>
+	<tbody>
+		{{range .Topics}}
+		<tr>
+		<th>{{.Id}}</th>
+		<th>{{.Title}}</th>
+		<th>{{.Updated}}</th>
+		<th>{{.Views}}</th>
+		<th>{{.ReplyCount}}</th>
+		</tr>
+		{{end}}
+	</tbody>
+</table>
+
+</div>
+{{end}}
