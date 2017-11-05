@@ -167,6 +167,45 @@ func DeleteTopic(tid string) error {
 	return err
 }
 
+type Comment struct {
+	Id      int64
+	Tid     int64
+	Name    string
+	Content string    `orm:"size(1000)"`
+	Created time.Time `orm:"index"`
+}
+
+func AddReply(tid, nickname, content string) error {
+	tidNum, err := strconv.ParseInt(tid, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	reply := &Comment{
+		Tid:     tidNum,
+		Name:    nickname,
+		Content: content,
+		Created: time.Now(),
+	}
+
+	o := orm.NewOrm()
+	_, err = o.Insert(reply)
+	return err
+}
+
+func GetAllReplies(tid string) ([]*Comment, error) {
+	tidNum, err := strconv.ParseInt(tid, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	replies := make([]*Comment, 0)
+	o := orm.NewOrm()
+	qs := o.QueryTable("comment")
+	_, err = qs.Filter("tid", tidNum).All(&replies)
+	return replies, err
+}
+
 type User struct {
 	Id    int64
 	Name  string `orm:"index"`
@@ -216,7 +255,7 @@ func RegisterDB() {
 		os.Create(_DB_NAME)
 	}
 
-	orm.RegisterModel(new(Category), new(Topic), new(User))
+	orm.RegisterModel(new(Category), new(Topic), new(User), new(Comment))
 	orm.RegisterDriver(_SQLITE3_DRIVER, orm.DRSqlite)
 	orm.RegisterDataBase("default", _SQLITE3_DRIVER, _DB_NAME, 10)
 }

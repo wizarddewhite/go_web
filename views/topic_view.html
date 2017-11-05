@@ -6,5 +6,24 @@
 	<a href="/topic/modify?tid={{.Tid}}" class="btn btn-default">Modify</a>
 </h1>
 {{.Topic.Content}}
+<div>
+	<h3>Reply</h3>
+	{{range .Replies}}
+	<h3>{{.Name}} <small>{{.Created}}</small></h3>
+	{{.Content}}
+	{{end}}
+	<form method="post" action="/reply/add">
+		<input type="hidden" name="tid" value="{{.Topic.Id}}">
+		<div class="form-group">
+			<label>Nick:</label>
+			<input type="text" class="form-control" name="nickname">
+		</div>
+		<div class="form-group">
+			<label>Content:</label>
+			<textarea name="content" id="" cols="30" rows="10" class="form-control"></textarea>
+		</div>
+		<button class="btn btn-default">Submit Reply</button>
+	</form>
+</div>
 </div>
 {{end}}
