@@ -1,0 +1,10 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+<h1>{{.Topic.Title}}
+	<a href="/topic/modify?tid={{.Tid}}" class="btn btn-default">Modify</a>
+</h1>
+{{.Topic.Content}}
+</div>
+{{end}}

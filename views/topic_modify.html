@@ -1,0 +1,23 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+<h1>Modify Topic</h1>
+
+<form method="post" action="/topic/">
+	<input type="hidden" name="tid" value="{{.Tid}}">
+	<div class="form-grouop">
+		<label>Title:</label>
+		<input type="text" name="title" class="form-control" value="{{.Topic.Title}}">
+	</div>
+	<div class="form-grouop">
+		<label>Content:</label>
+		<textarea name="content" cols="30" rows="10" class="form-control">
+		{{.Topic.Content}}
+		</textarea>
+	</div>
+	<button type="submit" class="btn btn-default">Modify</button>
+</form>
+
+</div>
+{{end}}
