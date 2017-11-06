@@ -16,4 +16,6 @@ func init() {
 	beego.Router("/reply", &controllers.ReplyController{})
 	beego.Router("/reply/add", &controllers.ReplyController{}, "post:Add")
 	beego.Router("/reply/delete", &controllers.ReplyController{}, "get:Delete")
+
+	beego.Router("/statistic/update", &controllers.StatisticController{}, "post:Update")
 }
