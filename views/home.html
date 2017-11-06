@@ -2,6 +2,15 @@
 
 {{define "body"}}
 <div class="container">
+	<div>
+		<h3>Category</h3>
+		<ul>
+			{{range .Categories}}
+			<li><a href="/?cate={{.Title}}">{{.Title}}</a></li>
+			{{end}}
+		</ul>
+	</div>
+	<div class="col-md-9">
 	{{range .Topics}}
 	<div class="page-header">
 		<h1><a href="/topic/view/{{.Id}}">{{.Title}}</a></h1>
@@ -11,5 +20,6 @@
 		</p>
 	</div>
 	{{end}}
+	</div>
 <div>
 {{end}}

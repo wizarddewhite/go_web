@@ -102,7 +102,7 @@ func AddTopic(title, category, content string) error {
 	return err
 }
 
-func GetAllTopics(isDesc bool) ([]*Topic, error) {
+func GetAllTopics(cate string, isDesc bool) ([]*Topic, error) {
 	o := orm.NewOrm()
 
 	topics := make([]*Topic, 0)
@@ -110,6 +110,9 @@ func GetAllTopics(isDesc bool) ([]*Topic, error) {
 
 	var err error
 	if isDesc {
+		if len(cate) > 0 {
+			qs = qs.Filter("category", cate)
+		}
 		_, err = qs.OrderBy("-created").All(&topics)
 	} else {
 		_, err = qs.All(&topics)
