@@ -8,8 +8,11 @@
 {{.Topic.Content}}
 <div>
 	<h3>Reply</h3>
+	{{$tid := .Topic.Id}}
 	{{range .Replies}}
-	<h3>{{.Name}} <small>{{.Created}}</small></h3>
+	<h3>{{.Name}} <small>{{.Created}}</small>
+		<a href="/reply/delete?tid={{$tid}}&rid={{.Id}}">Delete</a>
+	</h3>
 	{{.Content}}
 	{{end}}
 	<form method="post" action="/reply/add">
