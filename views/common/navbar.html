@@ -4,7 +4,9 @@
 	    <div>
 	    <ul class="nav navbar-nav">
 		    <li {{if .IsHome}}class="active"{{end}}><a href="/">First</a></li>
+		    {{if .IsAdmin}}
 		    <li {{if .IsCategory}}class="active"{{end}}><a href="/category">Category</a></li>
+		    {{end}}
 		    <li {{if .IsTopic}}class="active"{{end}}><a href="/topic">Post</a></li>
 	    </ul>
 	    </div>

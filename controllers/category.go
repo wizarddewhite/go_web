@@ -14,6 +14,11 @@ type CategoryController struct {
 
 func (this *CategoryController) Get() {
 	op := this.Input().Get("op")
+	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
+	if !this.Data["IsAdmin"].(bool) {
+		this.Redirect("/", 302)
+		return
+	}
 
 	switch op {
 	case "add":
@@ -46,7 +51,6 @@ func (this *CategoryController) Get() {
 	this.TplName = "category.html"
 	this.Data["Title"] = "Category"
 	this.Data["IsCategory"] = true
-	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 
 	var err error
 	this.Data["Categories"], err = models.GetAllCategories()
