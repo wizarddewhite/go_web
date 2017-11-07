@@ -14,9 +14,14 @@ type AccountController struct {
 
 func (this *AccountController) Get() {
 	isReg := this.Input().Get("reg") == "true"
+	this.Data["Title"] = "account"
+	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 
 	if isReg {
 		this.TplName = "account_reg.html"
+	} else if this.Data["IsAdmin"].(bool) {
+		this.Data["Users"], _ = models.GetAllUsers()
+		this.TplName = "account.html"
 	} else {
 		ck, err := this.Ctx.Request.Cookie("uname")
 		if err == nil {
@@ -28,8 +33,6 @@ func (this *AccountController) Get() {
 		}
 		this.TplName = "account.html"
 	}
-	this.Data["Title"] = "account"
-	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 }
 
 func (this *AccountController) Post() {

@@ -11,14 +11,24 @@
 		</tr>
 	</thead>
 	<tbody>
-		{{if .User}}
-		{{with .User}}
-		<tr>
-		<th>{{.Id}}</th>
-		<th>{{.Name}}</th>
-		<th>{{.Outbound}}</th>
-		</tr>
-		{{end}}
+		{{if .IsAdmin}}
+			{{range .Users}}
+			<tr>
+			<th>{{.Id}}</th>
+			<th>{{.Name}}</th>
+			<th>{{.Outbound}}</th>
+			</tr>
+			{{end}}
+		{{else}}
+			{{if .User}}
+			{{with .User}}
+			<tr>
+			<th>{{.Id}}</th>
+			<th>{{.Name}}</th>
+			<th>{{.Outbound}}</th>
+			</tr>
+			{{end}}
+			{{end}}
 		{{end}}
 	</tbody>
 </table>

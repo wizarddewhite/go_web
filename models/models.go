@@ -255,6 +255,15 @@ func AddUser(name, pwd string) error {
 	return nil
 }
 
+func GetAllUsers() ([]*User, error) {
+	o := orm.NewOrm()
+
+	users := make([]*User, 0)
+	qs := o.QueryTable("user")
+	_, err := qs.All(&users)
+	return users, err
+}
+
 func GetUser(name string) *User {
 	o := orm.NewOrm()
 
