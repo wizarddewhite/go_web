@@ -221,11 +221,12 @@ func GetAllReplies(tid string) ([]*Comment, error) {
 }
 
 type User struct {
-	Id    int64
-	Name  string `orm:"index"`
-	PWD   string
-	Total int64
-	Used  int64
+	Id       int64
+	Name     string `orm:"index"`
+	PWD      string
+	Total    int64
+	Inbound  float64
+	Outbound float64
 }
 
 func AddUser(name, pwd string) error {
@@ -261,6 +262,26 @@ func GetUser(name string) *User {
 	} else {
 		return user
 	}
+}
+
+func ModifyUserStat(name, inbound, outbound string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	var val float64
+	val, _ = strconv.ParseFloat(inbound, 64)
+	user.Inbound += val
+	val, _ = strconv.ParseFloat(outbound, 64)
+	user.Outbound += val
+	o.Update(user)
+	return nil
 }
 
 func RegisterDB() {
