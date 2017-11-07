@@ -72,5 +72,9 @@ func checkAccount(ctx *context.Context) (bool, bool) {
 	pwd := ck.Value
 
 	user := models.GetUser(uname)
-	return user != nil && user.Name == uname && pwd_same(user.PWD, pwd), user.IsAdmin
+	if user == nil {
+		return false, false
+	} else {
+		return user.Name == uname && pwd_same(user.PWD, pwd), user.IsAdmin
+	}
 }
