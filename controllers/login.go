@@ -59,18 +59,18 @@ func (this *LoginController) Post() {
 	return
 }
 
-func checkAccount(ctx *context.Context) bool {
+func checkAccount(ctx *context.Context) (bool, bool) {
 	ck, err := ctx.Request.Cookie("uname")
 	if err != nil {
-		return false
+		return false, false
 	}
 	uname := ck.Value
 	ck, err = ctx.Request.Cookie("pwd")
 	if err != nil {
-		return false
+		return false, false
 	}
 	pwd := ck.Value
 
 	user := models.GetUser(uname)
-	return user != nil && user.Name == uname && pwd_same(user.PWD, pwd)
+	return user != nil && user.Name == uname && pwd_same(user.PWD, pwd), user.IsAdmin
 }

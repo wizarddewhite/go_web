@@ -223,6 +223,7 @@ func GetAllReplies(tid string) ([]*Comment, error) {
 type User struct {
 	Id       int64
 	Name     string `orm:"index"`
+	IsAdmin  bool
 	PWD      string
 	Total    int64
 	Inbound  float64

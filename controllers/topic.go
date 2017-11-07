@@ -14,7 +14,7 @@ func (this *TopicController) Get() {
 	this.TplName = "topic.html"
 	this.Data["Title"] = "Topic List"
 	this.Data["IsTopic"] = true
-	this.Data["IsLogin"] = checkAccount(this.Ctx)
+	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 	topics, err := models.GetAllTopics("", false)
 	if err != nil {
 		beego.Error(err)
@@ -24,7 +24,7 @@ func (this *TopicController) Get() {
 }
 
 func (this *TopicController) Post() {
-	if !checkAccount(this.Ctx) {
+	if login, _ := checkAccount(this.Ctx); !login {
 		this.Redirect("/login", 302)
 		return
 	}
@@ -53,7 +53,7 @@ func (this *TopicController) Add() {
 	this.TplName = "topic_add.html"
 	this.Data["Title"] = "Add Topic"
 	this.Data["IsTopic"] = true
-	this.Data["IsLogin"] = checkAccount(this.Ctx)
+	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 }
 
 func (this *TopicController) View() {
@@ -66,7 +66,7 @@ func (this *TopicController) View() {
 	this.TplName = "topic_view.html"
 	this.Data["Title"] = topic.Title
 	this.Data["IsTopic"] = true
-	this.Data["IsLogin"] = checkAccount(this.Ctx)
+	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 
 	this.Data["Topic"] = topic
 	this.Data["Tid"] = this.Ctx.Input.Params()["0"]
@@ -90,13 +90,13 @@ func (this *TopicController) Modify() {
 	}
 	this.Data["Title"] = topic.Title
 	this.Data["IsTopic"] = true
-	this.Data["IsLogin"] = checkAccount(this.Ctx)
+	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 	this.Data["Topic"] = topic
 	this.Data["Tid"] = tid
 }
 
 func (this *TopicController) Delete() {
-	if !checkAccount(this.Ctx) {
+	if login, _ := checkAccount(this.Ctx); !login {
 		this.Redirect("/login", 302)
 		return
 	}

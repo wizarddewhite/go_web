@@ -29,7 +29,7 @@ func (this *AccountController) Get() {
 		this.TplName = "account.html"
 	}
 	this.Data["Title"] = "account"
-	this.Data["IsLogin"] = checkAccount(this.Ctx)
+	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 }
 
 func (this *AccountController) Post() {
