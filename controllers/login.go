@@ -6,6 +6,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/context"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type LoginController struct {
@@ -27,6 +28,15 @@ func (this *LoginController) Get() {
 	this.Data["Title"] = "login"
 }
 
+func pwd_same(pwd_hash, pwd string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(pwd_hash), []byte(pwd))
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+
 func (this *LoginController) Post() {
 	//this.Ctx.WriteString(fmt.Sprint(this.Input()))
 	uname := this.Input().Get("uname")
@@ -34,7 +44,7 @@ func (this *LoginController) Post() {
 	autoLogin := this.Input().Get("autoLogin") == "on"
 
 	user := models.GetUser(uname)
-	if user != nil && user.Name == uname && user.PWD == pwd {
+	if user != nil && user.Name == uname && pwd_same(user.PWD, pwd) {
 		maxAge := 0
 		if autoLogin {
 			maxAge = 1<<31 - 1
@@ -62,5 +72,5 @@ func checkAccount(ctx *context.Context) bool {
 	pwd := ck.Value
 
 	user := models.GetUser(uname)
-	return user != nil && user.Name == uname && user.PWD == pwd
+	return user != nil && user.Name == uname && pwd_same(user.PWD, pwd)
 }

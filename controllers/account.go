@@ -4,6 +4,7 @@ import (
 	"go_web/models"
 
 	"github.com/astaxie/beego"
+	"golang.org/x/crypto/bcrypt"
 	//"github.com/astaxie/beego/context"
 )
 
@@ -34,8 +35,13 @@ func (this *AccountController) Get() {
 func (this *AccountController) Post() {
 	uname := this.Input().Get("uname")
 	pwd := this.Input().Get("pwd")
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	if err != nil {
+		this.Redirect("/account?reg=true", 301)
+		return
+	}
 
-	err := models.AddUser(uname, pwd)
+	err = models.AddUser(uname, string(hash))
 	if err != nil {
 		this.Redirect("/account?reg=true", 301)
 	} else {
