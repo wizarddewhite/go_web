@@ -23,6 +23,7 @@ func (this *AccountController) Get() {
 
 	// only login user could view his account
 	if !this.Data["IsLogin"].(bool) {
+		this.Ctx.SetCookie("flash", "Please Login first", 1024, "/")
 		this.Redirect("/login", 301)
 		return
 	}

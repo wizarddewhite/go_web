@@ -26,6 +26,11 @@ func (this *LoginController) Get() {
 
 	this.TplName = "login.html"
 	this.Data["Title"] = "login"
+	ck, err := this.Ctx.Request.Cookie("flash")
+	if err == nil {
+		this.Data["Flash"] = ck.Value
+		this.Ctx.SetCookie("flash", "", -1, "/")
+	}
 }
 
 func pwd_same(pwd_hash, pwd string) bool {
