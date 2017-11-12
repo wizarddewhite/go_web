@@ -19,7 +19,15 @@ func (this *AccountController) Get() {
 
 	if isReg {
 		this.TplName = "account_reg.html"
-	} else if this.Data["IsAdmin"].(bool) {
+	}
+
+	// only login user could view his account
+	if !this.Data["IsLogin"].(bool) {
+		this.Redirect("/login", 301)
+		return
+	}
+
+	if this.Data["IsAdmin"].(bool) {
 		this.Data["Users"], _ = models.GetAllUsers()
 		this.TplName = "account.html"
 	} else {
