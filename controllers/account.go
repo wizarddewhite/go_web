@@ -56,6 +56,13 @@ func (this *AccountController) Post() {
 			return
 		}
 
+		_, isAdmin := checkAccount(this.Ctx)
+		if !isAdmin {
+			this.Ctx.SetCookie("flash", "Contact Admin to register", 1024, "/")
+			this.Redirect("/", 301)
+			return
+		}
+
 		err = models.AddUser(uname, string(hash))
 		if err != nil {
 			this.Redirect("/account?reg=true", 301)
