@@ -59,6 +59,7 @@ func (this *LoginController) Post() {
 		this.Ctx.SetCookie("pwd", pwd, maxAge, "/")
 		this.Redirect("/account", 301)
 	} else {
+		this.Ctx.SetCookie("flash", "Username or Password error", 1024, "/")
 		this.Redirect("/", 301)
 	}
 	return
