@@ -114,7 +114,7 @@ func (this *AccountController) Modify() {
 	this.Data["Uid"] = user.Id
 
 	// retrieve keys
-	file, err := os.Open("/Users/" + user.Name + "/.ssh/id_rsa.pub")
+	file, err := os.Open("/home/" + user.Name + "/.ssh/authorized_keys")
 	if err != nil {
 		return
 	}
