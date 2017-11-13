@@ -23,5 +23,24 @@
 	<button type="submit" class="btn btn-default">Modify</button>
 </form>
 
+<script>
+function checkInput() {
+	var uname = document.getElementById("uname");
+
+	if (uname.value.length == 0) {
+		alert("Please input your user name");
+		return false;
+	}
+
+	var pwd = document.getElementById("pwd");
+
+	if (pwd.value.length == 0) {
+		alert("Please input your password");
+		return false;
+	}
+
+	return true;
+}
+</script>
 </div>
 {{end}}
