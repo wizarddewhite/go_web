@@ -18,10 +18,14 @@ func (this *AccountController) Get() {
 	this.Data["Title"] = "account"
 	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
 
+	// register a new user
 	if isReg {
 		this.TplName = "account_reg.html"
+		return
 	}
 
+	// get account information
+	user := getLoginUser(&this.Controller)
 	// only login user could view his account
 	if !this.Data["IsLogin"].(bool) {
 		this.Ctx.SetCookie("flash", "Please Login first", 1024, "/")
@@ -30,17 +34,12 @@ func (this *AccountController) Get() {
 	}
 
 	if this.Data["IsAdmin"].(bool) {
+		// admin could view all users' informatioin
 		this.Data["Users"], _ = models.GetAllUsers()
 		this.TplName = "account.html"
 	} else {
-		ck, err := this.Ctx.Request.Cookie("uname")
-		if err == nil {
-			uname := ck.Value
-			user := models.GetUser(uname)
-			this.Data["User"] = user
-		} else {
-			this.Data["User"] = nil
-		}
+		// normal user only view his informatioin
+		this.Data["User"] = user
 		this.TplName = "account.html"
 	}
 }
