@@ -16,7 +16,9 @@
 	</div>
 	<div class="form-grouop">
 		<label>Key:</label>
-		<textarea name="key" cols="30" rows="10" class="form-control">holder</textarea>
+		{{range .Keys}}
+		<textarea name="key" cols="30" rows="10" class="form-control" readonly>{{.}}</textarea>
+		{{end}}
 	</div>
 	<button type="submit" class="btn btn-default">Modify</button>
 </form>

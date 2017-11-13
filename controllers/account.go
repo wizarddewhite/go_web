@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bufio"
 	"go_web/models"
+	"os"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -110,4 +112,17 @@ func (this *AccountController) Modify() {
 	this.Data["Title"] = "Modify account"
 	this.Data["Account"] = user
 	this.Data["Uid"] = user.Id
+
+	// retrieve keys
+	file, err := os.Open("/Users/" + user.Name + "/.ssh/id_rsa.pub")
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var keys []string
+	for scanner.Scan() {
+		keys = append(keys, scanner.Text())
+	}
+	this.Data["Keys"] = keys
 }
