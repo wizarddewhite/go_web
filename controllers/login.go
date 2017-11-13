@@ -83,3 +83,30 @@ func checkAccount(ctx *context.Context) (bool, bool) {
 		return user.Name == uname && pwd_same(user.PWD, pwd), user.IsAdmin
 	}
 }
+
+func getLoginUser(this *beego.Controller) *models.User {
+	var uname, pwd string
+	var user *models.User
+	ck, err := this.Ctx.Request.Cookie("uname")
+	if err != nil {
+		goto NOLOGIN
+	}
+	uname = ck.Value
+	ck, err = this.Ctx.Request.Cookie("pwd")
+	if err != nil {
+		goto NOLOGIN
+	}
+	pwd = ck.Value
+
+	user = models.GetUser(uname)
+	if user != nil && pwd_same(user.PWD, pwd) {
+		this.Data["IsLogin"] = true
+		this.Data["IsAdmin"] = user.IsAdmin
+		return user
+	}
+
+NOLOGIN:
+	this.Data["IsLogin"] = false
+	this.Data["IsAdmin"] = false
+	return nil
+}
