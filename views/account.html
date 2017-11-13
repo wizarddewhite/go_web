@@ -8,6 +8,7 @@
 			<th>#</th>
 			<th>name</th>
 			<th>used</th>
+			<th>action</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -17,6 +18,9 @@
 			<th>{{.Id}}</th>
 			<th>{{.Name}}</th>
 			<th>{{.Outbound}}</th>
+			<th>
+				<a href="/account/modify/{{.Id}}">Modify</a>
+			</th>
 			</tr>
 			{{end}}
 		{{else}}
@@ -26,6 +30,9 @@
 			<th>{{.Id}}</th>
 			<th>{{.Name}}</th>
 			<th>{{.Outbound}}</th>
+			<th>
+				<a href="/account/modify/{{.Id}}">Modify</a>
+			</th>
 			</tr>
 			{{end}}
 			{{end}}

@@ -15,6 +15,11 @@ func (this *MainController) Get() {
 	this.Data["Title"] = "home"
 	this.Data["IsHome"] = true
 	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
+	ck, err := this.Ctx.Request.Cookie("flash")
+	if err == nil {
+		this.Data["Flash"] = ck.Value
+		this.Ctx.SetCookie("flash", "", -1, "/")
+	}
 	topics, err := models.GetAllTopics(this.Input().Get("cate"), true)
 	if err != nil {
 		beego.Error(err)

@@ -1,0 +1,25 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+<h1>Modify Account</h1>
+
+<form method="POST" action="/account/">
+	<input type="hidden" name="uid" value="{{.Uid}}">
+	<div class="form-grouop">
+		<label>Name:</label>
+		<input id="uname" class="form-control" value="{{.Account.Name}}" name="uname" readonly>
+	</div>
+	<div class="form-grouop">
+		<label>Password:</label>
+		<input id="pwd" type="password" class="form-control" placeholder="New Password" name="pwd">
+	</div>
+	<div class="form-grouop">
+		<label>Key:</label>
+		<textarea name="key" cols="30" rows="10" class="form-control">holder</textarea>
+	</div>
+	<button type="submit" class="btn btn-default">Modify</button>
+</form>
+
+</div>
+{{end}}

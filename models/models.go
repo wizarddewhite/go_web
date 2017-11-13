@@ -278,6 +278,20 @@ func GetUser(name string) *User {
 	}
 }
 
+func GetUserById(id int64) *User {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("id", id).One(user)
+	if err == orm.ErrNoRows {
+		return nil
+	} else {
+		return user
+	}
+}
+
 func ModifyUserStat(name, inbound, outbound string) error {
 	o := orm.NewOrm()
 
@@ -294,6 +308,22 @@ func ModifyUserStat(name, inbound, outbound string) error {
 	user.Inbound += val
 	val, _ = strconv.ParseFloat(outbound, 64)
 	user.Outbound += val
+	o.Update(user)
+	return nil
+}
+
+func ModifyUserSec(name, pwd, key string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	user.PWD = pwd
 	o.Update(user)
 	return nil
 }

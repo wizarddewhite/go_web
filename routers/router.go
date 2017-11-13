@@ -11,6 +11,7 @@ func init() {
 	beego.Router("/login", &controllers.LoginController{})
 	beego.Router("/category", &controllers.CategoryController{})
 	beego.Router("/account", &controllers.AccountController{})
+	beego.AutoRouter(&controllers.AccountController{})
 	beego.Router("/topic", &controllers.TopicController{})
 	beego.AutoRouter(&controllers.TopicController{})
 	beego.Router("/reply", &controllers.ReplyController{})
