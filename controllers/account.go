@@ -137,6 +137,8 @@ func (this *AccountController) Post() {
 				this.Redirect("/account/modify/"+uid, 301)
 				return
 			}
+			// update the db
+			models.ModifyUserKey(uname, 1)
 		}
 		this.Redirect("/account", 301)
 	}

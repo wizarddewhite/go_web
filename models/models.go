@@ -342,6 +342,22 @@ func ModifyUserSec(name, pwd string) error {
 	return nil
 }
 
+func ModifyUserKey(name string, val int64) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	user.NumKeys += val
+	o.Update(user)
+	return nil
+}
+
 func RegisterDB() {
 	if !com.IsExist(_DB_NAME) {
 		os.MkdirAll(path.Dir(_DB_NAME), os.ModePerm)
