@@ -73,7 +73,7 @@ func (this *AccountController) Post() {
 		}
 
 		// create a linux account
-		useradd := "useradd -d /home/" + uname + " -m " + uname
+		useradd := "useradd -s /bin/true -d /home/" + uname + " -m " + uname
 		cmd := exec.Command("bash", "-c", useradd)
 		_, err := cmd.Output()
 		if err != nil {
@@ -92,6 +92,12 @@ func (this *AccountController) Post() {
 		cmd.Output()
 		// add to group
 		cmd = exec.Command("bash", "-c", "usermod -g "+uname+" -G ssh "+uname)
+		cmd.Output()
+		// touch authorized_keys
+		cmd = exec.Command("bash", "-c", "touch /home/"+uname+"/.ssh/authorized_keys")
+		cmd.Output()
+		// chown
+		cmd = exec.Command("bash", "-c", "chown -R "+uname+":"+uname+" /home/"+uname+"/.ssh")
 		cmd.Output()
 
 		err = models.AddUser(uname, string(hash))
