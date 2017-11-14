@@ -123,7 +123,8 @@ func (this *AccountController) Post() {
 
 		// add a new key
 		new_key := this.Input().Get("key")
-		if len(new_key) != 0 {
+		user := models.GetUser(uname)
+		if len(new_key) != 0 && user != nil && user.NumKeys < user.KeyLimit {
 			file, err := os.OpenFile("/home/"+uname+"/.ssh/authorized_keys", os.O_APPEND|os.O_WRONLY, 0600)
 			if err != nil {
 				this.Redirect("/account/modify/"+uid, 301)
