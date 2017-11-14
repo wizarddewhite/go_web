@@ -326,7 +326,7 @@ func ModifyUserStat(name, inbound, outbound string) error {
 	return nil
 }
 
-func ModifyUserSec(name, pwd, key string) error {
+func ModifyUserSec(name, pwd string) error {
 	o := orm.NewOrm()
 
 	user := new(User)

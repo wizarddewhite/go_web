@@ -115,7 +115,7 @@ func (this *AccountController) Post() {
 
 		// change password
 		if len(pwd) != 0 {
-			err = models.ModifyUserSec(uname, string(hash), "holder")
+			err = models.ModifyUserSec(uname, string(hash))
 			if err != nil {
 				this.Redirect("/account/modify/"+uid, 301)
 			}
