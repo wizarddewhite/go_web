@@ -230,6 +230,18 @@ type User struct {
 	Outbound float64
 }
 
+func DeleteUser(id string) error {
+	uid, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	o := orm.NewOrm()
+	user := &User{Id: uid}
+	_, err = o.Delete(user)
+	return err
+}
+
 func AddUser(name, pwd string) error {
 	o := orm.NewOrm()
 

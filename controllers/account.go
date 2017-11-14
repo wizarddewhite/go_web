@@ -19,6 +19,11 @@ func (this *AccountController) Get() {
 	isReg := this.Input().Get("reg") == "true"
 	this.Data["Title"] = "account"
 	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
+	ck, err := this.Ctx.Request.Cookie("flash")
+	if err == nil {
+		this.Data["Flash"] = ck.Value
+		this.Ctx.SetCookie("flash", "", -1, "/")
+	}
 
 	// register a new user
 	if isReg {
@@ -125,4 +130,36 @@ func (this *AccountController) Modify() {
 		keys = append(keys, scanner.Text())
 	}
 	this.Data["Keys"] = keys
+}
+
+func (this *AccountController) Delete() {
+	var user *models.User
+	var uid int64
+	var err error
+	if len(this.Ctx.Input.Params()["0"]) == 0 {
+		this.Ctx.SetCookie("flash", "Page not found", 1024, "/")
+		goto DONE
+	}
+
+	// only admin could delete user
+	user = getLoginUser(&this.Controller)
+	if user == nil || !user.IsAdmin {
+		this.Ctx.SetCookie("flash", "Page not found", 1024, "/")
+		goto DONE
+	}
+
+	uid, _ = strconv.ParseInt(this.Ctx.Input.Params()["0"], 10, 64)
+	user = models.GetUserById(uid)
+	if user == nil {
+		this.Ctx.SetCookie("flash", "No such User", 1024, "/")
+		goto DONE
+	}
+
+	err = models.DeleteUser(this.Ctx.Input.Params()["0"])
+	if err != nil {
+		beego.Error(err)
+	}
+	this.Ctx.SetCookie("flash", "User deleted", 1024, "/")
+DONE:
+	this.Redirect("/account", 302)
 }
