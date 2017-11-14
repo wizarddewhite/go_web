@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"go_web/models"
 	"os"
+	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"golang.org/x/crypto/bcrypt"
@@ -69,6 +71,28 @@ func (this *AccountController) Post() {
 			this.Redirect("/", 301)
 			return
 		}
+
+		// create a linux account
+		useradd := "useradd -d /home/" + uname + " -m " + uname
+		cmd := exec.Command("bash", "-c", useradd)
+		_, err := cmd.Output()
+		if err != nil {
+			s := strings.Split(err.Error(), " ")
+			if len(s) == 3 && s[2] == "9" {
+				this.Ctx.SetCookie("flash", "User already exist, change another name", 1024, "/")
+			} else {
+				this.Ctx.SetCookie("flash", "System Error, try again", 1024, "/")
+			}
+			this.Redirect("/account?reg=true", 301)
+			return
+		}
+
+		// mkdir
+		cmd = exec.Command("bash", "-c", "mkdir -p /home/"+uname+"/.ssh")
+		cmd.Output()
+		// add to group
+		cmd = exec.Command("bash", "-c", "usermod -g "+uname+" -G ssh "+uname)
+		cmd.Output()
 
 		err = models.AddUser(uname, string(hash))
 		if err != nil {
@@ -158,6 +182,13 @@ func (this *AccountController) Delete() {
 	err = models.DeleteUser(this.Ctx.Input.Params()["0"])
 	if err != nil {
 		beego.Error(err)
+	} else {
+		// delete user
+		cmd := exec.Command("bash", "-c", "userdel "+user.Name)
+		cmd.Output()
+		// remote dir
+		cmd = exec.Command("bash", "-c", "rm -rf /home/"+user.Name)
+		cmd.Output()
 	}
 	this.Ctx.SetCookie("flash", "User deleted", 1024, "/")
 DONE:
