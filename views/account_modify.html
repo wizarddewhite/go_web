@@ -15,16 +15,22 @@
 		<input id="pwd" type="password" class="form-control" placeholder="New Password" name="pwd">
 	</div>
 	<div class="form-grouop">
-		<label>Key:</label>
-		{{range .Keys}}
-		<textarea name="key" cols="30" rows="10" class="form-control" readonly>{{.}}</textarea>
-		{{end}}
+		<label>Add New Key:</label>
+		<textarea name="key" cols="30" rows="10" class="form-control" placeholder="Leave it blank if not necessary"></textarea>
 	</div>
-	<button type="submit" class="btn btn-default" onclick="return checkInput()">Modify</button>
+	<button type="submit" class="btn btn-default" onclick="return checkPwd()">Modify Account</button>
 </form>
 
+	<div class="form-grouop">
+		<label>Key List:</label>
+		{{range $i, $e := .Keys}}
+		<textarea name="key" cols="30" rows="10" class="form-control" readonly>{{$e}}</textarea>
+		<a href="/account/key/delete/{{$i}}">Delete</a>
+		{{end}}
+	</div>
+
 <script>
-function checkInput() {
+function checkPwd() {
 	var uname = document.getElementById("uname");
 
 	if (uname.value.length == 0) {
@@ -33,11 +39,6 @@ function checkInput() {
 	}
 
 	var pwd = document.getElementById("pwd");
-
-	if (pwd.value.length == 0) {
-		alert("Please input your password");
-		return false;
-	}
 
 	return true;
 }

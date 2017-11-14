@@ -228,6 +228,7 @@ type User struct {
 	Total    int64
 	Inbound  float64
 	Outbound float64
+	NumKeys  int64 `orm:"default(2)"`
 }
 
 func DeleteUser(id string) error {

@@ -107,12 +107,31 @@ func (this *AccountController) Post() {
 			return
 		}
 
-		err = models.ModifyUserSec(uname, string(hash), "holder")
-		if err != nil {
-			this.Redirect("/account/modify/"+uid, 301)
-		} else {
-			this.Redirect("/account", 301)
+		// change password
+		if len(pwd) != 0 {
+			err = models.ModifyUserSec(uname, string(hash), "holder")
+			if err != nil {
+				this.Redirect("/account/modify/"+uid, 301)
+			}
 		}
+
+		// add a new key
+		new_key := this.Input().Get("key")
+		if len(new_key) != 0 {
+			file, err := os.OpenFile("/home/"+uname+"/.ssh/authorized_keys", os.O_APPEND|os.O_WRONLY, 0600)
+			if err != nil {
+				this.Redirect("/account/modify/"+uid, 301)
+				return
+			}
+
+			defer file.Close()
+
+			if _, err = file.WriteString(new_key + "\n"); err != nil {
+				this.Redirect("/account/modify/"+uid, 301)
+				return
+			}
+		}
+		this.Redirect("/account", 301)
 	}
 
 	return
