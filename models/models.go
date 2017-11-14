@@ -248,8 +248,9 @@ func AddUser(name, pwd string) error {
 	o := orm.NewOrm()
 
 	user := &User{
-		Name: name,
-		PWD:  pwd,
+		Name:     name,
+		PWD:      pwd,
+		KeyLimit: 2,
 	}
 
 	qs := o.QueryTable("user")
