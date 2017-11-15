@@ -222,3 +222,57 @@ func (this *AccountController) Delete() {
 DONE:
 	this.Redirect("/account", 302)
 }
+
+func (this *AccountController) DeleteKey() {
+	var file *os.File
+	var err error
+	var scanner *bufio.Scanner
+	var keys []string
+	var index int64
+
+	user := getLoginUser(&this.Controller)
+	if user == nil {
+		this.Ctx.SetCookie("flash", "Please Login first", 1024, "/")
+		this.Redirect("/login", 301)
+		return
+	}
+
+	if len(this.Ctx.Input.Params()["0"]) == 0 {
+		goto DONE
+	}
+
+	index, _ = strconv.ParseInt(this.Ctx.Input.Params()["0"], 10, 64)
+
+	// read key again
+	file, err = os.OpenFile("/home/"+user.Name+"/.ssh/authorized_keys", os.O_RDWR, 0600)
+	if err != nil {
+		goto DONE
+	}
+	defer file.Close()
+	scanner = bufio.NewScanner(file)
+	for scanner.Scan() {
+		keys = append(keys, scanner.Text())
+	}
+
+	// if the index is out of range, return
+	if index >= int64(len(keys)) {
+		goto DONE
+	}
+
+	// truncate file to 0 and write keys back except the skipped one
+	err = file.Truncate(0)
+	if err != nil {
+		goto DONE
+	}
+	file.Seek(0, 0)
+
+	for i, key := range keys {
+		if int64(i) != index {
+			file.WriteString(key + "\n")
+		}
+	}
+
+DONE:
+	this.Redirect("/account", 302)
+	return
+}

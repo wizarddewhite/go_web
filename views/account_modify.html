@@ -25,7 +25,7 @@
 		<label>Key List:</label>
 		{{range $i, $e := .Keys}}
 		<textarea name="key" cols="30" rows="10" class="form-control" readonly>{{$e}}</textarea>
-		<a href="/account/key/delete/{{$i}}">Delete</a>
+		<a href="/account/deletekey/{{$i}}">Delete</a>
 		{{end}}
 	</div>
 
