@@ -271,6 +271,8 @@ func (this *AccountController) DeleteKey() {
 			file.WriteString(key + "\n")
 		}
 	}
+	// update the db
+	models.ModifyUserKey(user.Name, -1)
 
 DONE:
 	this.Redirect("/account", 302)
