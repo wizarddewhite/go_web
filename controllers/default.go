@@ -33,4 +33,5 @@ func (this *MainController) Get() {
 		this.Data["Categories"] = categories
 	}
 	beego.Trace("home/get")
+	beego.Trace(this.Ctx.Input.IP())
 }
