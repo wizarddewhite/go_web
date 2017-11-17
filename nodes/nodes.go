@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os/exec"
+	"time"
 
 	vultr "github.com/JamesClonk/vultr/lib"
 	"github.com/astaxie/beego"
@@ -18,6 +20,9 @@ type Node struct {
 }
 
 var buffer int
+
+const Multiple = 50
+
 var cand_nodes []Node
 var busy_nodes []Node
 
@@ -65,6 +70,56 @@ LABEL:
 	return errors.New("can't work with 42")
 }
 
+func checkStat(node *Node) {
+	times := 0
+AGAIN:
+	time.Sleep(time.Duration(10*times) * time.Second)
+	times += 1
+	done := make(chan error, 1)
+	cmd := exec.Command("bash", "-c", "ssh root@"+node.Server.MainIP+
+		" -p 26 ls /root/done")
+	err := cmd.Start()
+	if err != nil {
+		beego.Trace(err)
+		if times <= 8 {
+			goto AGAIN
+		} else {
+			goto DESTROY
+		}
+	}
+	go func() {
+		done <- cmd.Wait()
+	}()
+	select {
+	case <-time.After(10 * time.Second):
+		if err := cmd.Process.Kill(); err != nil {
+			beego.Error("failed to kill: ", err)
+		}
+		beego.Trace("process killed as timeout reached")
+		if times <= 8 {
+			goto AGAIN
+		} else {
+			goto DESTROY
+		}
+	case err := <-done:
+		if err != nil {
+			beego.Trace(err)
+			if times <= 8 {
+				goto AGAIN
+			} else {
+				goto DESTROY
+			}
+		} else {
+			beego.Trace(node.Server.MainIP + " is UP")
+			cand_nodes = append([]Node{*node}, cand_nodes...)
+			return
+		}
+	}
+
+DESTROY:
+	beego.Trace(node.Server.MainIP + " will be destroyed")
+}
+
 // retrieve nodes
 func RetrieveNodes() error {
 	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
@@ -74,23 +129,23 @@ func RetrieveNodes() error {
 		return err
 	}
 
-	hasmaster := false
+	nodes := make([]Node, 0, 10)
 	for _, serv := range servers {
 		if serv.MainIP == master {
-			hasmaster = true
 			cand_nodes = append([]Node{Node{0, true, serv}}, cand_nodes...)
+			buffer = Multiple / 2
 		} else {
-			cand_nodes = append([]Node{Node{0, false, serv}}, cand_nodes...)
+			nodes = append([]Node{Node{0, false, serv}}, nodes...)
 		}
 	}
 
-	if !hasmaster {
+	if len(cand_nodes) == 0 {
 		beego.Trace("no master in list")
 		return errors.New("no master in list")
 	}
 
-	for _, node := range cand_nodes {
-		beego.Trace("%s: %s\n", node.Server.ID, node.IsMaster)
+	for _, node := range nodes {
+		go checkStat(&node)
 	}
 
 	fmt.Println(len(cand_nodes))
