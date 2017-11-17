@@ -359,13 +359,29 @@ func ModifyUserKey(name string, val int64) error {
 	return nil
 }
 
+type Host struct {
+	Id    int64
+	Users int64
+	IP    string
+}
+
+func GetAllHosts() ([]*Host, error) {
+	o := orm.NewOrm()
+
+	hosts := make([]*Host, 0)
+	qs := o.QueryTable("host")
+	_, err := qs.All(&hosts)
+	return hosts, err
+}
+
 func RegisterDB() {
 	if !com.IsExist(_DB_NAME) {
 		os.MkdirAll(path.Dir(_DB_NAME), os.ModePerm)
 		os.Create(_DB_NAME)
 	}
 
-	orm.RegisterModel(new(Category), new(Topic), new(User), new(Comment))
+	orm.RegisterModel(new(Category), new(Topic),
+		new(User), new(Comment), new(Host))
 	orm.RegisterDriver(_SQLITE3_DRIVER, orm.DRSqlite)
 	orm.RegisterDataBase("default", _SQLITE3_DRIVER, _DB_NAME, 10)
 }
