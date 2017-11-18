@@ -22,8 +22,10 @@ var buffer int
 
 const Multiple = 50
 
-var cand_nodes []Node
-var busy_nodes []Node
+// first node is master
+var nodes []Node
+var cand_nodes []*Node
+var busy_nodes []*Node
 
 // the first non local ipv4 address
 func GetMaster() error {
@@ -80,6 +82,9 @@ func deleteNode(node *Node) error {
 }
 
 func checkStat(node *Node) {
+	if node.IsMaster {
+		return
+	}
 	times := 0
 AGAIN:
 	time.Sleep(time.Duration(10*times) * time.Second)
@@ -120,7 +125,7 @@ AGAIN:
 			}
 		} else {
 			beego.Trace(node.Server.MainIP + " is UP")
-			cand_nodes = append([]Node{*node}, cand_nodes...)
+			cand_nodes = append([]*Node{node}, cand_nodes...)
 			return
 		}
 	}
@@ -142,13 +147,16 @@ func RetrieveNodes() error {
 		return err
 	}
 
-	nodes := make([]Node, 0, 10)
 	for _, serv := range servers {
 		if serv.MainIP == master {
-			cand_nodes = append([]Node{Node{0, true, serv}}, cand_nodes...)
+			// prepend to nodes, master is the first node
+			nodes = append([]Node{Node{0, true, serv}}, nodes...)
+			// the master must be the cand
+			cand_nodes = append([]*Node{&nodes[0]}, cand_nodes...)
 			buffer = Multiple / 2
 		} else {
-			nodes = append([]Node{Node{0, false, serv}}, nodes...)
+			// append to nodes
+			nodes = append(nodes, Node{0, false, serv})
 		}
 	}
 
@@ -157,7 +165,7 @@ func RetrieveNodes() error {
 		return errors.New("no master in list")
 	}
 
-	for _, node := range nodes {
+	for _, node := range nodes[1:] {
 		go checkStat(&node)
 	}
 
