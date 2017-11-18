@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net"
 	"os/exec"
+	"sync"
 	"time"
 
 	vultr "github.com/JamesClonk/vultr/lib"
@@ -23,7 +24,10 @@ var buffer int
 const Multiple = 50
 
 // first node is master
+
+var node_mux sync.Mutex
 var nodes []Node
+var cand_mux sync.Mutex
 var cand_nodes []*Node
 var busy_nodes []*Node
 
@@ -78,6 +82,14 @@ func deleteNode(node *Node) error {
 	}
 	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
 	err := client.DeleteServer(node.Server.ID)
+	node_mux.Lock()
+	for i, n := range nodes {
+		// remove
+		if node.Server.ID == n.Server.ID {
+			nodes = append(nodes[:i], nodes[i+1:]...)
+		}
+	}
+	node_mux.Unlock()
 	return err
 }
 
@@ -125,7 +137,9 @@ AGAIN:
 			}
 		} else {
 			beego.Trace(node.Server.MainIP + " is UP")
+			cand_mux.Lock()
 			cand_nodes = append([]*Node{node}, cand_nodes...)
+			cand_mux.Unlock()
 			return
 		}
 	}
@@ -169,7 +183,5 @@ func RetrieveNodes() error {
 		go checkStat(&node)
 	}
 
-	// remove
-	//cand_nodes = append(cand_nodes[:0], cand_nodes[1:]...)
 	return nil
 }
