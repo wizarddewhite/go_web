@@ -21,10 +21,10 @@ type Node struct {
 
 var buffer int
 
+// the magic parameter to adjust
 const Multiple = 50
 
 // first node is master
-
 var node_mux sync.Mutex
 var nodes []Node
 var cand_mux sync.Mutex
@@ -139,6 +139,7 @@ AGAIN:
 			beego.Trace(node.Server.MainIP + " is UP")
 			cand_mux.Lock()
 			cand_nodes = append([]*Node{node}, cand_nodes...)
+			buffer += Multiple
 			cand_mux.Unlock()
 			return
 		}
