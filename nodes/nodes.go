@@ -2,7 +2,6 @@ package nodes
 
 import (
 	"errors"
-	"fmt"
 	"net"
 	"os/exec"
 	"time"
@@ -70,6 +69,16 @@ LABEL:
 	return errors.New("can't work with 42")
 }
 
+func deleteNode(node *Node) error {
+	if node.IsMaster {
+		beego.Trace("trying to delete master")
+		return nil
+	}
+	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
+	err := client.DeleteServer(node.Server.ID)
+	return err
+}
+
 func checkStat(node *Node) {
 	times := 0
 AGAIN:
@@ -118,6 +127,10 @@ AGAIN:
 
 DESTROY:
 	beego.Trace(node.Server.MainIP + " will be destroyed")
+	deleteNode(node)
+	if err != nil {
+		beego.Error(node.Server.ID + " not destroyed")
+	}
 }
 
 // retrieve nodes
@@ -147,9 +160,6 @@ func RetrieveNodes() error {
 	for _, node := range nodes {
 		go checkStat(&node)
 	}
-
-	fmt.Println(len(cand_nodes))
-	fmt.Println(len(busy_nodes))
 
 	// remove
 	//cand_nodes = append(cand_nodes[:0], cand_nodes[1:]...)
