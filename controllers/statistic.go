@@ -18,7 +18,7 @@ type Stat struct {
 }
 
 type StatSlice struct {
-	Token string
+	Users string
 	Stats []Stat
 }
 
@@ -31,7 +31,7 @@ func (this *StatisticController) Update() {
 		for _, v := range m {
 			switch vv := v.(type) {
 			case string:
-				s.Token = v.(string)
+				s.Users = v.(string)
 			case []interface{}:
 				for _, u := range vv {
 					data, ok := u.(map[string]interface{})
@@ -54,8 +54,7 @@ func (this *StatisticController) Update() {
 		return
 	}
 
-	// Check the token first
-	beego.Trace(s.Token)
+	// Check the ip first
 
 	this.Data["json"] = "{\"Status\":\"ok\"}"
 	this.ServeJSON()
