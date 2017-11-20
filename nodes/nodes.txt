@@ -1,0 +1,108 @@
+A brief doc on node management
+
+# Variable description
+
+## master
+
+A string store the master IP address.
+
+## buffer and Multiple
+
+Multiple is a magic number which means number of connections per node
+simultaneously. Currently it is set to 50, we may adjust it on experiment.
+
+buffer stands for the total available connections for cand_nodes. If this
+value is too low, we need to create a new node.
+
+## nodes and cand_nodes
+
+These two are array of nodes.
+
+nodes contains all the nodes created on vultr which could be
+
+    * available     : created and setup properly
+    * not available : created but not setup properly
+
+cand_nodes only contains the nodes which could accept new connection.
+
+    * a newly created node is prepend to it
+    * master node is supposed to be the last
+    * ?do we want to sort the array by number of users?
+
+
+# Current scenario
+
+## Bootup
+
+When system bootup or reboot, it retrieves the node list from vultr. Mostly,
+all nodes are available nodes, which means all nodes are functional. While we
+can't ignore the case that the server is terminated when a node is created but
+not setup properly. This means we need to check each node and delete it if not
+setup properly.
+
+Currently we do the check by a file /root/done. If this file exists, the node
+is available, if not we need to destroy it.
+
+Because of this, there are two phase during bootup
+
+    * add master to cand_nodes, which is the default service node
+    * check each node in nodes, add available one to cand_nodes or delete
+      unavailable node from nodes
+
+Another thing need to keep in mind is the calculation of buffer. Since we just
+bootup, there is not statistic from nodes, buffer is set to the maximum value.
+We need to wait for next statistic update to adjust this value.
+
+## Node state change
+
+For all available nodes, we have two states
+
+    * candidate
+    * busy
+
+While we just have one queue cand_nodes, so how we support two states?
+
+    Every node in cand_nodes means it is able to serve new connection.
+    Every node not in cand_nodes means it is busy.
+
+On each statistic update, we get the bandwidth and connections on a node.
+
+    If the connection reaches the Multiple, it is removed from cand_nodes.
+    If the connection is less than (Multiple - X), it is added to cand_nodes.
+
+    ? Limit or change on bandwidth?
+    ...
+
+## Node create or delete
+
+To fully utilize nodes, we create/delete nodes based on buffer dynamically.
+
+On each statistic update, we get the connections on a node, which is used to
+update the buffer. The number is compared with the value stored in Node
+previously, by which we could get the delta of this period.
+
+To get the exact number of connections on all node, we ONLY create/delete node
+when we collect all statistic from all available nodes.
+
+After a node is created/deleted, it should be added/removed from cand_nodes
+and nodes.
+
+## User state sync
+
+During the system running, there would be two cases that change the user
+state.
+
+    * Add a user, new account registered
+    * Enable/disable a user, add/remove ssh group
+
+It is safe to do these management on master node, while not easy to sync to
+other nodes. Especially when master is rebooted during sync.
+
+To achieve this, Task table is created to record the task. A goroutine is
+created to go through the nodes to complete the task on each node. After each
+node finish the task, it is removed from Task table.
+
+Two place to change the state
+
+    * on each statistic update, when bandwidth exceed or account expire
+    * every noon a goroutine check all account
