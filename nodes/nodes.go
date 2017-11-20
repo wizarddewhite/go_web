@@ -132,19 +132,16 @@ AGAIN:
 		beego.Trace("process killed as timeout reached")
 		if times <= 8 {
 			goto AGAIN
-		} else {
-			goto DESTROY
 		}
 	case err := <-done:
 		if err != nil {
 			beego.Trace(err)
 			if times <= 8 {
 				goto AGAIN
-			} else {
-				goto DESTROY
 			}
 		} else {
 			beego.Trace(node.Server.MainIP + " is UP")
+			node.Users = -1 // abuse Users to indicate setup done
 			cand_mux.Lock()
 			cand_nodes = append([]*Node{node}, cand_nodes...)
 			buffer += Multiple
@@ -193,4 +190,65 @@ func RetrieveNodes() error {
 	}
 
 	return nil
+}
+
+// create a node
+func CreateNode() {
+	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
+	server, err := client.CreateServer("test", 7, 201, 241, nil)
+	if err != nil {
+		beego.Error(err)
+		return
+	}
+
+	// wait for installation, until state is ok
+	time.Sleep(2 * time.Minute)
+	for range [20]struct{}{} {
+		server, err = client.GetServer(server.ID)
+		if server.ServerState == "ok" {
+			break
+		}
+		time.Sleep(20 * time.Second)
+	}
+
+	// dup_machine
+	time.Sleep(30 * time.Second)
+
+	done := make(chan error, 1)
+	cmd := exec.Command("bash", "-c", "/root/dup_machine/dup_machine.sh "+server.MainIP+" "+server.DefaultPassword)
+	err = cmd.Start()
+	if err != nil {
+		beego.Trace(err)
+	}
+	go func() {
+		done <- cmd.Wait()
+	}()
+	select {
+	case <-time.After(5 * time.Minute):
+		if err := cmd.Process.Kill(); err != nil {
+			beego.Error("failed to kill: ", err)
+		}
+		beego.Trace("process killed as timeout reached")
+	case err := <-done:
+		if err != nil {
+			beego.Trace(err)
+		} else {
+			beego.Trace(server.MainIP + " is UP")
+		}
+	}
+
+	// Check the setup state
+	node := new(Node)
+	node.Users = 0
+	node.IsMaster = false
+	node.Server = server
+	checkStat(node)
+
+	// node is up, add to nodes
+	if node.Users == -1 {
+		node.Users = 0
+		node_mux.Lock()
+		nodes = append(nodes, *node)
+		node_mux.Unlock()
+	}
 }
