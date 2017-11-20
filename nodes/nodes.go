@@ -80,8 +80,15 @@ func deleteNode(node *Node) error {
 		beego.Trace("trying to delete master")
 		return nil
 	}
+	var err error
 	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
-	err := client.DeleteServer(node.Server.ID)
+	for range [30]struct{}{} {
+		err = client.DeleteServer(node.Server.ID)
+		if err == nil || err.Error() != "Unable to destroy server: Servers cannot be destroyed within 5 minutes of being created" {
+			break
+		}
+		time.Sleep(10 * time.Second)
+	}
 	node_mux.Lock()
 	for i, n := range nodes {
 		// remove
