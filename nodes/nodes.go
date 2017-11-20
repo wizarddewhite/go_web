@@ -87,6 +87,7 @@ func deleteNode(node *Node) error {
 		// remove
 		if node.Server.ID == n.Server.ID {
 			nodes = append(nodes[:i], nodes[i+1:]...)
+			break
 		}
 	}
 	node_mux.Unlock()
