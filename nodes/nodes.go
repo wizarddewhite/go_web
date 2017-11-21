@@ -252,3 +252,10 @@ func CreateNode() {
 		node_mux.Unlock()
 	}
 }
+
+func GetNode() string {
+	cand_mux.Lock()
+	ip := cand_nodes[0].Server.MainIP
+	cand_mux.Unlock()
+	return ip
+}

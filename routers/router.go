@@ -19,4 +19,6 @@ func init() {
 	beego.Router("/statistic/update", &controllers.StatisticController{}, "post:Update")
 	beego.Router("/account", &controllers.AccountController{})
 	beego.AutoRouter(&controllers.AccountController{})
+
+	beego.Router("/node", &controllers.NodeController{})
 }
