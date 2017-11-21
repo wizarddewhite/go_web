@@ -215,7 +215,7 @@ func CreateNode() {
 	time.Sleep(30 * time.Second)
 
 	done := make(chan error, 1)
-	cmd := exec.Command("bash", "-c", "/root/dup_machine/dup_machine.sh "+server.MainIP+" "+server.DefaultPassword)
+	cmd := exec.Command("bash", "-c", "/root/dup_machine/dup_machine.sh "+server.MainIP+" \""+server.DefaultPassword+"\"")
 	err = cmd.Start()
 	if err != nil {
 		beego.Trace(err)
