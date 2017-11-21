@@ -185,8 +185,8 @@ func RetrieveNodes() error {
 		return errors.New("no master in list")
 	}
 
-	for _, node := range nodes[1:] {
-		go checkStat(&node)
+	for i, _ := range nodes[1:] {
+		go checkStat(&nodes[i+1])
 	}
 
 	return nil
