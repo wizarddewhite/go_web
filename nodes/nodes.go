@@ -140,7 +140,7 @@ AGAIN:
 				goto AGAIN
 			}
 		} else {
-			beego.Trace(node.Server.MainIP + " is UP")
+			beego.Trace(node.Server.MainIP + " is ready")
 			node.Users = -1 // abuse Users to indicate setup done
 			cand_mux.Lock()
 			cand_nodes = append([]*Node{node}, cand_nodes...)
@@ -233,7 +233,7 @@ func CreateNode() {
 		if err != nil {
 			beego.Trace(err)
 		} else {
-			beego.Trace(server.MainIP + " is UP")
+			beego.Trace(server.MainIP + " dup_machine executed")
 		}
 	}
 
