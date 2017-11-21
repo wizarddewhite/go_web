@@ -194,11 +194,19 @@ func RetrieveNodes() error {
 
 // create a node
 func CreateNode() {
+	var server vultr.Server
+	var err error
 	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
-	server, err := client.CreateServer("test", 7, 201, 241, nil)
-	if err != nil {
-		beego.Error(err)
-		return
+	// Amsterdam, Frankfurt, Paris
+	regions := [...]int{7, 9, 24}
+	for _, r := range regions {
+		server, err = client.CreateServer("test", r, 201, 241, nil)
+		if err == nil {
+			break
+		} else if err.Error() != "Plan is not available in the selected datacenter.  This could mean you have chosen the wrong plan (for example, a storage plan in a location that does not offer them), or the location you have selected does not have any more capacity." {
+			beego.Error(err)
+			return
+		}
 	}
 
 	// wait for installation, until state is ok
