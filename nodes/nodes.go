@@ -115,7 +115,7 @@ AGAIN:
 	err := cmd.Start()
 	if err != nil {
 		beego.Trace(err)
-		if times <= 8 {
+		if times <= 5 {
 			goto AGAIN
 		} else {
 			goto DESTROY
@@ -130,13 +130,13 @@ AGAIN:
 			beego.Error("failed to kill: ", err)
 		}
 		beego.Trace("process killed as timeout reached")
-		if times <= 8 {
+		if times <= 5 {
 			goto AGAIN
 		}
 	case err := <-done:
 		if err != nil {
 			beego.Trace(err)
-			if times <= 8 {
+			if times <= 5 {
 				goto AGAIN
 			}
 		} else {
