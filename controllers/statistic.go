@@ -3,6 +3,8 @@ package controllers
 import (
 	"encoding/json"
 	"go_web/models"
+	"go_web/nodes"
+	"strconv"
 
 	"github.com/astaxie/beego"
 )
@@ -54,10 +56,21 @@ func (this *StatisticController) Update() {
 		return
 	}
 
-	// Check the ip first
-
 	this.Data["json"] = "{\"Status\":\"ok\"}"
 	this.ServeJSON()
+
+	// Check the ip first
+	n := nodes.GetNode(this.Ctx.Input.IP())
+	if n == nil {
+		beego.Trace("someone unknown send us update")
+		return
+	}
+
+	current_users, _ := strconv.ParseInt(s.Users, 10, 64)
+	delta := int(current_users) - n.Users
+	n.Users = int(current_users)
+	nodes.UpdateBuffer(delta)
+
 	for _, stat := range s.Stats {
 		//beego.Trace(stat)
 		// check bandwidth first

@@ -19,6 +19,7 @@ type Node struct {
 	vultr.Server
 }
 
+var buff_mux sync.Mutex
 var buffer int
 
 // the magic parameter to adjust
@@ -261,9 +262,26 @@ func CreateNode() {
 	}
 }
 
-func GetNode() string {
+func GetServiceNode() string {
 	cand_mux.Lock()
 	ip := cand_nodes[0].Server.MainIP
 	cand_mux.Unlock()
 	return ip
+}
+
+func GetNode(ip string) *Node {
+	node_mux.Lock()
+	for _, n := range nodes {
+		if n.Server.MainIP == ip {
+			return &n
+		}
+	}
+	node_mux.Unlock()
+	return nil
+}
+
+func UpdateBuffer(delta int) {
+	buff_mux.Lock()
+	buffer = buffer - delta
+	buff_mux.Unlock()
 }
