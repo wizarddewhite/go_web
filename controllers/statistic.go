@@ -72,11 +72,12 @@ func (this *StatisticController) Update() {
 	n.Users = int(current_users)
 	nodes.UpdateBuffer(delta)
 
-	// delete the node from cand_nodes in case out of bandwidth
-
 	for _, stat := range s.Stats {
 		// write to data base
 		models.ModifyUserStat(stat.Name, stat.Inbound, stat.Outbound)
 		// disable a user in case out of bandwidth
 	}
+
+	// delete the node from cand_nodes in case out of bandwidth
+	nodes.CheckNodeBandwidth(n)
 }

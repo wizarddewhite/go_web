@@ -16,6 +16,7 @@ var master string
 type Node struct {
 	Users    int
 	IsMaster bool
+	IsOut    bool
 	vultr.Server
 }
 
@@ -169,15 +170,22 @@ func RetrieveNodes() error {
 	}
 
 	for _, serv := range servers {
+		isout := false
+
+		if serv.ServerState == "ok" &&
+			serv.CurrentBandwidth >= (serv.AllowedBandwidth*0.9) {
+			isout = true
+		}
+
 		if serv.MainIP == master {
 			// prepend to nodes, master is the first node
-			nodes = append([]Node{Node{0, true, serv}}, nodes...)
+			nodes = append([]Node{Node{0, true, isout, serv}}, nodes...)
 			// the master must be the cand
 			cand_nodes = append([]*Node{&nodes[0]}, cand_nodes...)
 			buffer = Multiple / 2
 		} else {
 			// append to nodes
-			nodes = append(nodes, Node{0, false, serv})
+			nodes = append(nodes, Node{0, false, isout, serv})
 		}
 	}
 
@@ -286,4 +294,28 @@ func UpdateBuffer(delta int) {
 	buffer -= delta
 	buff_mux.Unlock()
 	beego.Trace("current buffer is ", buffer)
+}
+
+func CheckNodeBandwidth(n *Node) {
+	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
+	server, err := client.GetServer(n.Server.ID)
+
+	if err != nil {
+		return
+	}
+
+	// running out of bandwidth, remove it from cand_node
+	if server.CurrentBandwidth >= (server.AllowedBandwidth * 0.9) {
+		cand_mux.Lock()
+		for i, c := range cand_nodes {
+			if c.Server.ID == n.Server.ID {
+				cand_nodes = append(cand_nodes[:i], cand_nodes[i+1:]...)
+				n.IsOut = true
+				buffer -= Multiple - n.Users
+				// delete the node after there is no connection
+				break
+			}
+		}
+		cand_mux.Unlock()
+	}
 }
