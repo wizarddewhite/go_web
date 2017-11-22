@@ -12,5 +12,5 @@ type NodeController struct {
 func (this *NodeController) Get() {
 	uname := this.Input().Get("uname")
 	ip := nodes.GetNode()
-	this.Ctx.WriteString(uname + "@" + ip)
+	this.Ctx.WriteString(uname + "@" + ip + "\n")
 }
