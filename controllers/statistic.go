@@ -66,16 +66,17 @@ func (this *StatisticController) Update() {
 		return
 	}
 
+	// update buffer
 	current_users, _ := strconv.ParseInt(s.Users, 10, 64)
 	delta := int(current_users) - n.Users
 	n.Users = int(current_users)
 	nodes.UpdateBuffer(delta)
 
-	for _, stat := range s.Stats {
-		//beego.Trace(stat)
-		// check bandwidth first
-		// write to data base
+	// delete the node from cand_nodes in case out of bandwidth
 
+	for _, stat := range s.Stats {
+		// write to data base
 		models.ModifyUserStat(stat.Name, stat.Inbound, stat.Outbound)
+		// disable a user in case out of bandwidth
 	}
 }

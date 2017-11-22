@@ -283,6 +283,7 @@ func GetNode(ip string) *Node {
 
 func UpdateBuffer(delta int) {
 	buff_mux.Lock()
-	buffer = buffer - delta
+	buffer -= delta
 	buff_mux.Unlock()
+	beego.Trace("current buffer is ", buffer)
 }
