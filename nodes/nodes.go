@@ -273,6 +273,7 @@ func GetNode(ip string) *Node {
 	node_mux.Lock()
 	for _, n := range nodes {
 		if n.Server.MainIP == ip {
+			node_mux.Unlock()
 			return &n
 		}
 	}
