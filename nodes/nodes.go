@@ -325,13 +325,15 @@ func CheckNodeBandwidth(n *Node) error {
 		return err
 	}
 
-	// running out of bandwidth, remove it from cand_node
-	if server.CurrentBandwidth >= (server.AllowedBandwidth * 0.9) {
+	// running out of bandwidth or full of user, remove it from cand_node
+	full := n.Users >= Multiple
+	out := server.CurrentBandwidth >= (server.AllowedBandwidth * 0.9)
+	if full || out {
 		cand_mux.Lock()
 		for i, c := range cand_nodes {
 			if c.Server.ID == n.Server.ID {
 				cand_nodes = append(cand_nodes[:i], cand_nodes[i+1:]...)
-				n.IsOut = true
+				n.IsOut = out
 				buffer -= Multiple - n.Users
 				// delete the node after there is no connection
 				break
