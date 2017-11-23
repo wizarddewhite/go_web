@@ -303,6 +303,11 @@ func UpdateBuffer(delta int) {
 }
 
 func CheckNodeBandwidth(n *Node) {
+	// the node is already removed from cand_nodes
+	if n.IsOut {
+		return
+	}
+
 	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
 	server, err := client.GetServer(n.Server.ID)
 
