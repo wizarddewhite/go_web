@@ -33,6 +33,16 @@ var cand_mux sync.Mutex
 var cand_nodes []*Node
 var busy_nodes []*Node
 
+var index int
+var cleanup_cond *sync.Cond
+
+func init() {
+	index = 0
+
+	cleanup_cond = sync.NewCond(new(sync.Mutex))
+	go cleanup_nodes()
+}
+
 // the first non local ipv4 address
 func GetMaster() error {
 	master = ""
@@ -302,17 +312,17 @@ func UpdateBuffer(delta int) {
 	beego.Trace("current buffer is ", buffer)
 }
 
-func CheckNodeBandwidth(n *Node) {
+func CheckNodeBandwidth(n *Node) error {
 	// the node is already removed from cand_nodes
 	if n.IsOut {
-		return
+		return nil
 	}
 
 	client := vultr.NewClient(beego.AppConfig.String("key"), nil)
 	server, err := client.GetServer(n.Server.ID)
 
 	if err != nil {
-		return
+		return err
 	}
 
 	// running out of bandwidth, remove it from cand_node
@@ -328,5 +338,27 @@ func CheckNodeBandwidth(n *Node) {
 			}
 		}
 		cand_mux.Unlock()
+	}
+	return nil
+}
+
+func cleanup_nodes() {
+	cleanup_cond.L.Lock()
+	cleanup_cond.Wait()
+	for i, n := range nodes {
+		beego.Trace(i, n.Server.MainIP)
+	}
+	cleanup_cond.L.Unlock()
+	index = 0
+	go cleanup_nodes()
+}
+
+func Cleanup() {
+	index += 1
+
+	if index == len(nodes) {
+		cleanup_cond.L.Lock()
+		cleanup_cond.Signal()
+		cleanup_cond.L.Unlock()
 	}
 }

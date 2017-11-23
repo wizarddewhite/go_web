@@ -79,5 +79,8 @@ func (this *StatisticController) Update() {
 	}
 
 	// delete the node from cand_nodes in case out of bandwidth
-	nodes.CheckNodeBandwidth(n)
+	err := nodes.CheckNodeBandwidth(n)
+	if err == nil {
+		nodes.Cleanup()
+	}
 }
