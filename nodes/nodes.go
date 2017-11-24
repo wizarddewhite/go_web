@@ -104,6 +104,7 @@ func deleteNode(node *Node) error {
 		}
 		time.Sleep(10 * time.Second)
 	}
+	beego.Info(node.Server.MainIP + " is deleted")
 	node_mux.Lock()
 	for i, n := range nodes {
 		// remove
@@ -155,7 +156,7 @@ AGAIN:
 				goto AGAIN
 			}
 		} else {
-			beego.Trace(node.Server.MainIP + " is ready")
+			beego.Info(node.Server.MainIP + " is ready")
 			node.Users = -1 // abuse Users to indicate setup done
 			cand_mux.Lock()
 			node.IsCand = true // mark it added to cand_nodes
