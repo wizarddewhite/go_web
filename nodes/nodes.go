@@ -331,14 +331,13 @@ func CheckNodeBandwidth(n *Node) error {
 		return err
 	}
 
-	// running out of bandwidth or full of user, remove it from cand_node
-	full := n.Users >= n.Limit
+	// running out of bandwidth remove it from cand_node
 	out := server.CurrentBandwidth >= (server.AllowedBandwidth * 0.9)
 	if out && n.IsMaster {
 		beego.Warn("Master is full")
 	}
 
-	if full || out {
+	if out {
 		cand_mux.Lock()
 		for i, c := range cand_nodes {
 			if c.Server.ID == n.Server.ID {
@@ -353,6 +352,24 @@ func CheckNodeBandwidth(n *Node) error {
 		cand_mux.Unlock()
 	}
 	return nil
+}
+
+func CheckNodeUsers(n *Node) {
+	if !n.IsCand {
+		return
+	}
+
+	if n.Users >= n.Limit {
+		cand_mux.Lock()
+		for i, c := range cand_nodes {
+			if c.Server.ID == n.Server.ID {
+				cand_nodes = append(cand_nodes[:i], cand_nodes[i+1:]...)
+				n.IsCand = false
+				break
+			}
+		}
+		cand_mux.Unlock()
+	}
 }
 
 func cleanup_nodes() {

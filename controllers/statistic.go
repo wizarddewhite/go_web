@@ -66,11 +66,13 @@ func (this *StatisticController) Update() {
 		return
 	}
 
-	// update buffer
-	current_users, _ := strconv.ParseInt(s.Users, 10, 64)
-	delta := int(current_users) - n.Users
-	n.Users = int(current_users)
-	nodes.UpdateBuffer(delta)
+	// update buffer, if the node is not full
+	if !n.IsOut {
+		current_users, _ := strconv.ParseInt(s.Users, 10, 64)
+		delta := int(current_users) - n.Users
+		n.Users = int(current_users)
+		nodes.UpdateBuffer(delta)
+	}
 
 	for _, stat := range s.Stats {
 		// write to data base
@@ -82,6 +84,7 @@ func (this *StatisticController) Update() {
 	// or full of users
 	err := nodes.CheckNodeBandwidth(n)
 	if err == nil {
+		nodes.CheckNodeUsers(n)
 		nodes.Cleanup()
 	}
 }
