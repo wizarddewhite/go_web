@@ -15,8 +15,10 @@ var master string
 
 type Node struct {
 	Users    int
+	Limit    int
 	IsMaster bool
 	IsOut    bool
+	IsCand   bool
 	vultr.Server
 }
 
@@ -24,6 +26,7 @@ var buff_mux sync.Mutex
 var buffer int
 
 // the magic parameter to adjust
+const N = 3
 const Multiple = 50
 
 // first node is master
@@ -155,8 +158,9 @@ AGAIN:
 			beego.Trace(node.Server.MainIP + " is ready")
 			node.Users = -1 // abuse Users to indicate setup done
 			cand_mux.Lock()
+			node.IsCand = true // mark it added to cand_nodes
 			cand_nodes = append([]*Node{node}, cand_nodes...)
-			buffer += Multiple
+			buffer += node.Limit
 			cand_mux.Unlock()
 			return
 		}
@@ -189,13 +193,13 @@ func RetrieveNodes() error {
 
 		if serv.MainIP == master {
 			// prepend to nodes, master is the first node
-			nodes = append([]Node{Node{0, true, isout, serv}}, nodes...)
+			nodes = append([]Node{Node{0, Multiple / 2, true, isout, true, serv}}, nodes...)
 			// the master must be the cand
 			cand_nodes = append([]*Node{&nodes[0]}, cand_nodes...)
 			buffer = Multiple / 2
 		} else {
 			// append to nodes
-			nodes = append(nodes, Node{0, false, isout, serv})
+			nodes = append(nodes, Node{0, Multiple, false, isout, false, serv})
 		}
 	}
 
@@ -268,6 +272,7 @@ func CreateNode() {
 	node := new(Node)
 	node.Users = 0
 	node.IsMaster = false
+	node.Limit = Multiple
 	node.Server = server
 	checkStat(node)
 
@@ -326,15 +331,20 @@ func CheckNodeBandwidth(n *Node) error {
 	}
 
 	// running out of bandwidth or full of user, remove it from cand_node
-	full := n.Users >= Multiple
+	full := n.Users >= n.Limit
 	out := server.CurrentBandwidth >= (server.AllowedBandwidth * 0.9)
+	if out && n.IsMaster {
+		beego.Warn("Master is full")
+	}
+
 	if full || out {
 		cand_mux.Lock()
 		for i, c := range cand_nodes {
 			if c.Server.ID == n.Server.ID {
 				cand_nodes = append(cand_nodes[:i], cand_nodes[i+1:]...)
 				n.IsOut = out
-				buffer -= Multiple - n.Users
+				n.IsCand = false
+				buffer -= n.Limit - n.Users
 				// delete the node after there is no connection
 				break
 			}
@@ -347,10 +357,60 @@ func CheckNodeBandwidth(n *Node) error {
 func cleanup_nodes() {
 	cleanup_cond.L.Lock()
 	cleanup_cond.Wait()
+	var full_nodes []*Node
+	node_mux.Lock()
 	for i, n := range nodes {
-		beego.Trace(i, n.Server.MainIP)
+		// if node is out of bandwidth and no user, delete it
+		if !n.IsMaster && n.IsOut && (n.Users == 0) {
+			full_nodes = append(full_nodes, &n)
+		}
+		// if node still has bandwidth and has 1/5 Multiply space
+		// add it to cand_nodes
+		if !n.IsCand && !n.IsOut && (n.Users < (n.Limit * 4 / 5)) {
+			cand_mux.Lock()
+			if n.IsMaster {
+				// add it to the last if this is master node
+				cand_nodes = append(cand_nodes, &nodes[i])
+			} else {
+				// or add it to the second last if not
+				cand_nodes = append(cand_nodes[:len(cand_nodes)-1],
+					&nodes[i], cand_nodes[len(cand_nodes)-1])
+			}
+			nodes[i].IsCand = true
+			buffer += n.Limit - n.Users
+			cand_mux.Unlock()
+		}
+
 	}
+	node_mux.Unlock()
+
+	// How we manage the number of nodes:
+	// 1. We always keep N number of alive nodes
+	// 2. buffer is lower than (Multiple / 2), create a Node
+	// 3. buffer is higher than (2 * Multiple), delete a none user one
+	if buffer < (Multiple / 2) {
+		go CreateNode()
+	} else if (len(nodes)-len(full_nodes)) > N && buffer > (2*Multiple) {
+
+		cand_mux.Lock()
+		for i, c := range cand_nodes[1:] {
+			if c.Users == 0 && !c.IsMaster {
+				cand_nodes = append(cand_nodes[:i+1], cand_nodes[i+2:]...)
+				buffer -= Multiple - c.Users
+				go deleteNode(c)
+				break
+			}
+		}
+		cand_mux.Unlock()
+	}
+
+	// delete Node if necessary
+	for _, n := range full_nodes {
+		go deleteNode(n)
+	}
+
 	cleanup_cond.L.Unlock()
+
 	index = 0
 	go cleanup_nodes()
 }
