@@ -159,7 +159,6 @@ AGAIN:
 			}
 		} else {
 			beego.Info(node.Server.MainIP + " is ready")
-			node.Users = -1 // abuse Users to indicate setup done
 			cand_mux.Lock()
 			node.IsCand = true // mark it added to cand_nodes
 			cand_nodes = append([]*Node{node}, cand_nodes...)
@@ -277,13 +276,13 @@ func CreateNode() {
 	node := new(Node)
 	node.Users = 0
 	node.IsMaster = false
+	node.IsCand = false
 	node.Limit = Multiple
 	node.Server = server
 	checkStat(node)
 
 	// node is up, add to nodes
-	if node.Users == -1 {
-		node.Users = 0
+	if node.IsCand {
 		node_mux.Lock()
 		nodes = append(nodes, *node)
 		node_mux.Unlock()
