@@ -201,8 +201,9 @@ func RetrieveNodes() error {
 			cand_nodes = append([]*Node{&nodes[0]}, cand_nodes...)
 			buffer = Multiple / 2
 		} else {
-			// append to nodes
-			nodes = append(nodes, Node{0, Multiple, false, isout, false, serv})
+			// append to nodes, fake it to be IsCand to avoid
+			// been added to cand_nodes during checkStat()
+			nodes = append(nodes, Node{0, Multiple, false, isout, true, serv})
 		}
 	}
 
