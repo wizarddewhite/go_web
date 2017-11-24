@@ -399,7 +399,6 @@ func cleanup_nodes() {
 					&nodes[i], cand_nodes[len(cand_nodes)-1])
 			}
 			nodes[i].IsCand = true
-			buffer += n.Limit - n.Users
 			cand_mux.Unlock()
 		}
 
