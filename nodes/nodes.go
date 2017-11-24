@@ -43,6 +43,7 @@ var cleanup_cond *sync.Cond
 func init() {
 	index = 0
 
+	cu = make(chan int)
 	cleanup_cond = sync.NewCond(new(sync.Mutex))
 	go cleanup_nodes()
 }
