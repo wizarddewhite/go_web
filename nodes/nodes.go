@@ -153,7 +153,7 @@ AGAIN:
 		}
 	case err := <-done:
 		if err != nil {
-			beego.Trace(err)
+			beego.Trace(node.Server.MainIP, err)
 			if times <= 5 {
 				goto AGAIN
 			}
