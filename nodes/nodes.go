@@ -37,6 +37,7 @@ var cand_nodes []*Node
 var busy_nodes []*Node
 
 var index int
+var cu chan int
 var cleanup_cond *sync.Cond
 
 func init() {
@@ -435,11 +436,25 @@ func cleanup_nodes() {
 }
 
 func Cleanup() {
+
+	if index == 0 {
+		go func() {
+			select {
+			case <-cu:
+				cleanup_cond.L.Lock()
+				cleanup_cond.Signal()
+				cleanup_cond.L.Unlock()
+			case <-time.After(60 * time.Second):
+				cleanup_cond.L.Lock()
+				cleanup_cond.Signal()
+				cleanup_cond.L.Unlock()
+			}
+		}()
+	}
+
 	index += 1
 
 	if index == len(nodes) {
-		cleanup_cond.L.Lock()
-		cleanup_cond.Signal()
-		cleanup_cond.L.Unlock()
+		cu <- index
 	}
 }
