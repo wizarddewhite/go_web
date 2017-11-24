@@ -233,6 +233,7 @@ func CreateNode() {
 		}
 	}
 
+	beego.Info("Trying to create: ", server.ID)
 	// wait for installation, until state is ok
 	time.Sleep(2 * time.Minute)
 	for range [20]struct{}{} {
