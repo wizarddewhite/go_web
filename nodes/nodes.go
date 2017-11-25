@@ -408,7 +408,7 @@ func cleanup_nodes() {
 	// 1. We always keep N number of alive nodes
 	// 2. buffer is lower than (Multiple / 2), create a Node
 	// 3. buffer is higher than (2 * Multiple), delete a none user one
-	if buffer < (Multiple / 2) {
+	if buffer < (Multiple * 2 / 5) {
 		go CreateNode()
 	} else if (len(nodes)-len(full_nodes)) > N && buffer > (2*Multiple) {
 
