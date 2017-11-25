@@ -221,13 +221,17 @@ func GetAllReplies(tid string) ([]*Comment, error) {
 }
 
 type User struct {
-	Id       int64
-	Name     string `orm:"index"`
-	IsAdmin  bool
-	PWD      string
-	Total    int64
+	Id      int64
+	Name    string `orm:"index"`
+	IsAdmin bool
+	PWD     string
+
+	// bandwidth
+	Total    float64
 	Inbound  float64
 	Outbound float64
+
+	// key manage
 	KeyLimit int64 `orm:"default(2)"`
 	NumKeys  int64 `orm:"default(0)"`
 }
@@ -307,7 +311,7 @@ func GetUserById(id int64) *User {
 	}
 }
 
-func ModifyUserStat(name, inbound, outbound string) error {
+func ModifyUserStat(name, inbound, outbound string) (error, bool) {
 	o := orm.NewOrm()
 
 	user := new(User)
@@ -315,7 +319,7 @@ func ModifyUserStat(name, inbound, outbound string) error {
 	qs := o.QueryTable("user")
 	err := qs.Filter("name", name).One(user)
 	if err == orm.ErrNoRows {
-		return err
+		return err, false
 	}
 
 	var val float64
@@ -324,7 +328,7 @@ func ModifyUserStat(name, inbound, outbound string) error {
 	val, _ = strconv.ParseFloat(outbound, 64)
 	user.Outbound += val
 	o.Update(user)
-	return nil
+	return nil, user.Outbound > user.Total
 }
 
 func ModifyUserSec(name, pwd string) error {
