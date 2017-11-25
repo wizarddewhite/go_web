@@ -90,9 +90,6 @@ func (this *AccountController) Post() {
 		// mkdir
 		cmd = exec.Command("bash", "-c", "mkdir -p /home/"+uname+"/.ssh")
 		cmd.Output()
-		// add to group
-		cmd = exec.Command("bash", "-c", "usermod -g "+uname+" -G ssh "+uname)
-		cmd.Output()
 		// touch authorized_keys
 		cmd = exec.Command("bash", "-c", "touch /home/"+uname+"/.ssh/authorized_keys")
 		cmd.Output()
