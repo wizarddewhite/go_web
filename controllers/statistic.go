@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"go_web/models"
 	"go_web/nodes"
+	"os/exec"
 	"strconv"
 
 	"github.com/astaxie/beego"
@@ -76,8 +77,18 @@ func (this *StatisticController) Update() {
 
 	for _, stat := range s.Stats {
 		// write to data base
-		models.ModifyUserStat(stat.Name, stat.Inbound, stat.Outbound)
+		err2, out := models.ModifyUserStat(stat.Name, stat.Inbound, stat.Outbound)
+
+		if err2 != nil {
+			continue
+		}
 		// disable a user in case out of bandwidth
+		if out {
+			// remove from ssh group
+			cmd := exec.Command("bash", "-c",
+				"usermod -g "+stat.Name+" -G "+stat.Name+" "+stat.Name)
+			cmd.Output()
+		}
 	}
 
 	// delete the node from cand_nodes in case out of bandwidth
