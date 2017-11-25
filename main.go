@@ -21,7 +21,7 @@ func main() {
 	orm.Debug = true
 	orm.RunSyncdb("default", false, true)
 
-	logs.SetLogger(logs.AdapterFile, `{"filename":"vipland.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
+	logs.SetLogger(logs.AdapterFile, `{"filename":"logs/freeland.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
 
 	// setup master
 	err := nodes.GetMaster()
