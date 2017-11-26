@@ -88,6 +88,9 @@ func (this *StatisticController) Update() {
 			cmd := exec.Command("bash", "-c",
 				"usermod -g "+stat.Name+" -G "+stat.Name+" "+stat.Name)
 			cmd.Output()
+
+			// Add it to task list
+			nodes.AddTask(stat.Name, "disable")
 		}
 	}
 

@@ -36,16 +36,35 @@ var cand_mux sync.Mutex
 var cand_nodes []*Node
 var busy_nodes []*Node
 
+// node cleanup routine
 var index int
 var cu chan int
 var cleanup_cond *sync.Cond
 
+// account sync routine
+var as chan int
+var as_cond *sync.Cond
+
+type Task struct {
+	Name   string
+	Action string /* create, delete, enable, disable, key */
+}
+
+var task_mux sync.Mutex
+var task_list []Task
+
 func init() {
 	index = 0
 
+	// node cleanup routine
 	cu = make(chan int)
 	cleanup_cond = sync.NewCond(new(sync.Mutex))
 	go cleanup_nodes()
+
+	// account sync routine
+	as = make(chan int)
+	as_cond = sync.NewCond(new(sync.Mutex))
+	go account_sync()
 }
 
 // the first non local ipv4 address
@@ -433,6 +452,8 @@ func cleanup_nodes() {
 
 	index = 0
 	go cleanup_nodes()
+	// kick the Task handling
+	go AccSync()
 }
 
 func Cleanup() {
@@ -457,4 +478,66 @@ func Cleanup() {
 	if index == len(nodes) {
 		cu <- index
 	}
+}
+
+func AddTask(uname, action string) {
+	task_mux.Lock()
+	task_list = append(task_list, Task{uname, action})
+	task_mux.Unlock()
+}
+
+func account_sync() {
+	as_cond.L.Lock()
+	as_cond.Wait()
+	node_mux.Lock()
+	task_mux.Lock()
+	for _, n := range nodes {
+		for _, t := range task_list {
+			var sub_cmd string
+			switch t.Action {
+			case "create":
+				sub_cmd = "/root/tasks/create_user.sh " + n.Server.MainIP + " " + t.Name
+			case "delete":
+				sub_cmd = "/root/tasks/delete_user.sh " + n.Server.MainIP + " " + t.Name
+			case "enable":
+				sub_cmd = "/root/tasks/enable.sh " + n.Server.MainIP + " " + t.Name
+			case "disable":
+				sub_cmd = "/root/tasks/disable.sh " + n.Server.MainIP + " " + t.Name
+			case "key":
+				sub_cmd = "/root/tasks/key.sh " + n.Server.MainIP + " " + t.Name
+			}
+			done := make(chan error, 1)
+			cmd := exec.Command("bash", "-c", sub_cmd)
+			err := cmd.Start()
+			if err != nil {
+				beego.Warn(err)
+				continue
+			}
+			go func() {
+				done <- cmd.Wait()
+			}()
+			select {
+			case <-time.After(2 * time.Minute):
+				if err := cmd.Process.Kill(); err != nil {
+					beego.Error("failed to kill: ", err)
+				}
+				beego.Warn(sub_cmd, " killed as timeout reached")
+			case err := <-done:
+				if err != nil {
+					beego.Trace(err)
+				}
+			}
+		}
+	}
+	task_mux.Unlock()
+	node_mux.Unlock()
+	as_cond.L.Unlock()
+
+	go account_sync()
+}
+
+func AccSync() {
+	as_cond.L.Lock()
+	as_cond.Signal()
+	as_cond.L.Unlock()
 }
