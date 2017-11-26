@@ -529,6 +529,7 @@ func account_sync() {
 			}
 		}
 	}
+	task_list = nil
 	task_mux.Unlock()
 	node_mux.Unlock()
 	as_cond.L.Unlock()
