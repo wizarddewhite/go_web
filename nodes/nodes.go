@@ -491,7 +491,7 @@ func account_sync() {
 	as_cond.Wait()
 	node_mux.Lock()
 	task_mux.Lock()
-	for _, n := range nodes {
+	for _, n := range nodes[1:] {
 		for _, t := range task_list {
 			var sub_cmd string
 			switch t.Action {
