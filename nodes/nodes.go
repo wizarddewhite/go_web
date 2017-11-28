@@ -1,6 +1,7 @@
 package nodes
 
 import (
+	"bytes"
 	"errors"
 	"math/rand"
 	"net"
@@ -21,6 +22,7 @@ type Node struct {
 	IsMaster bool
 	IsOut    bool
 	IsCand   bool
+	words    string
 	vultr.Server
 }
 
@@ -180,7 +182,9 @@ AGAIN:
 	times += 1
 	done := make(chan error, 1)
 	cmd := exec.Command("bash", "-c", "ssh root@"+node.Server.MainIP+
-		" -p 26 ls /root/done")
+		" -p 26 cat /root/done")
+	var out bytes.Buffer
+	cmd.Stdout = &out
 	err := cmd.Start()
 	if err != nil {
 		beego.Trace(err)
@@ -210,8 +214,9 @@ AGAIN:
 			}
 		} else {
 			beego.Info(node.Server.MainIP + " is ready")
-			cand_mux.Lock()
 			node.IsCand = true // mark it added to cand_nodes
+			node.words = out.String()
+			cand_mux.Lock()
 			cand_nodes = append([]*Node{node}, cand_nodes...)
 			buffer += node.Limit
 			cand_mux.Unlock()
@@ -246,14 +251,14 @@ func RetrieveNodes() error {
 
 		if serv.MainIP == master {
 			// prepend to nodes, master is the first node
-			nodes = append([]Node{Node{0, Multiple / 2, true, isout, true, serv}}, nodes...)
+			nodes = append([]Node{Node{0, Multiple / 2, true, isout, true, "", serv}}, nodes...)
 			// the master must be the cand
 			cand_nodes = append([]*Node{&nodes[0]}, cand_nodes...)
 			buffer = Multiple / 2
 		} else {
 			// append to nodes, fake it to be IsCand to avoid
 			// been added to cand_nodes during checkStat()
-			nodes = append(nodes, Node{0, Multiple, false, isout, true, serv})
+			nodes = append(nodes, Node{0, Multiple, false, isout, true, "", serv})
 		}
 	}
 
