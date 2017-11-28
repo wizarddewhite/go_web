@@ -2,8 +2,10 @@ package nodes
 
 import (
 	"errors"
+	"math/rand"
 	"net"
 	"os/exec"
+	"strconv"
 	"sync"
 	"time"
 
@@ -53,8 +55,20 @@ type Task struct {
 var task_mux sync.Mutex
 var task_list []Task
 
+const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+const (
+	letterIdxBits = 6                    // 6 bits to represent a letter index
+	letterIdxMask = 1<<letterIdxBits - 1 // All 1-bits, as many as letterIdxBits
+	letterIdxMax  = 63 / letterIdxBits   // # of letter indices fitting in 63 bits
+)
+
+var word_src = rand.NewSource(time.Now().UnixNano())
+
 func init() {
 	index = 0
+
+	rand.Seed(time.Now().UnixNano())
 
 	// node cleanup routine
 	cu = make(chan int)
@@ -65,6 +79,24 @@ func init() {
 	as = make(chan int)
 	as_cond = sync.NewCond(new(sync.Mutex))
 	go account_sync()
+}
+
+func RandStringBytesMaskImprSrc(n int) string {
+	b := make([]byte, n)
+	// A word_src.Int63() generates 63 random bits, enough for letterIdxMax characters!
+	for i, cache, remain := n-1, word_src.Int63(), letterIdxMax; i >= 0; {
+		if remain == 0 {
+			cache, remain = word_src.Int63(), letterIdxMax
+		}
+		if idx := int(cache & letterIdxMask); idx < len(letterBytes) {
+			b[i] = letterBytes[idx]
+			i--
+		}
+		cache >>= letterIdxBits
+		remain--
+	}
+
+	return string(b)
 }
 
 // the first non local ipv4 address
@@ -269,7 +301,8 @@ func CreateNode() {
 	time.Sleep(30 * time.Second)
 
 	done := make(chan error, 1)
-	cmd := exec.Command("bash", "-c", "/root/dup_machine/dup_machine.sh "+server.MainIP+" \""+server.DefaultPassword+"\"")
+	port := strconv.FormatInt(int64(rand.Intn(10)+30), 10)
+	cmd := exec.Command("bash", "-c", "/root/dup_machine/dup_machine.sh "+server.MainIP+" '"+server.DefaultPassword+"' "+RandStringBytesMaskImprSrc(10)+" "+port)
 	err = cmd.Start()
 	if err != nil {
 		beego.Trace(err)
