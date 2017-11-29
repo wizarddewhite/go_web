@@ -5,18 +5,18 @@
 <table class="table table-striped">
 	<thead>
 		<tr>
-			<th>#</th>
-			<th>name</th>
-			<th>used</th>
-			<th>action</th>
+			<th>Name</th>
+			<th>Expire</th>
+			<th>Used</th>
+			<th>Action</th>
 		</tr>
 	</thead>
 	<tbody>
 		{{if .IsAdmin}}
 			{{range .Users}}
 			<tr>
-			<th>{{.Id}}</th>
 			<th>{{.Name}}</th>
+			<th>{{date .Expire "Y-m-d T"}}</th>
 			<th>{{.Outbound}}MB</th>
 			<th>
 				<a href="/account/modify/{{.Id}}">Modify</a>|
@@ -30,8 +30,8 @@
 			{{if .User}}
 			{{with .User}}
 			<tr>
-			<th>{{.Id}}</th>
 			<th>{{.Name}}</th>
+			<th>{{date .Expire "Y-m-d T"}}</th>
 			<th>{{.Outbound}}MB</th>
 			<th>
 				<a href="/account/modify/{{.Id}}">Modify</a>
