@@ -87,6 +87,9 @@ func (this *AccountController) Post() {
 			return
 		}
 
+		// password
+		cmd = exec.Command("bash", "-c", "usermod -p '*' "+uname)
+		cmd.Output()
 		// mkdir
 		cmd = exec.Command("bash", "-c", "mkdir -p /home/"+uname+"/.ssh")
 		cmd.Output()
