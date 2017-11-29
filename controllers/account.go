@@ -3,6 +3,7 @@ package controllers
 import (
 	"bufio"
 	"go_web/models"
+	"go_web/nodes"
 	"os"
 	"os/exec"
 	"strconv"
@@ -273,7 +274,7 @@ func (this *AccountController) Delete() {
 		cmd = exec.Command("bash", "-c", "rm -rf /home/"+user.Name)
 		cmd.Output()
 		// Add a task and kick it
-		nodes.AddTask(uname, "delete")
+		nodes.AddTask(user.Name, "delete")
 		nodes.AccSync()
 	}
 	this.Ctx.SetCookie("flash", "User deleted", 1024, "/")
