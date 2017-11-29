@@ -200,8 +200,8 @@ func (this *AccountController) ResetBD() {
 	}
 	// Reset user bandwidth usage
 	models.ModifyUserStat(user.Name, "-1", "-1")
-	this.Ctx.SetCookie("flash", user.Name+"BD Flashed", 1024, "/")
-	this.Redirect("/", 301)
+	this.Ctx.SetCookie("flash", user.Name+" BD Flashed", 1024, "/")
+	this.Redirect("/account", 301)
 }
 
 func (this *AccountController) Delete() {
