@@ -232,8 +232,8 @@ type User struct {
 	Outbound float64
 
 	// expire
-	Expire     int64
-	NextRefill int64
+	Expire     time.Time
+	NextRefill time.Time
 
 	// key manage
 	KeyLimit int64 `orm:"default(2)"`
@@ -351,15 +351,15 @@ func ExpandUserExpire(name string, m int) error {
 	}
 
 	tn := time.Now().UTC()
-	te := time.Unix(user.Expire, 0)
+	te := user.Expire
 	if tn.After(te) {
 		// already expired, start from now
-		user.Expire = tn.AddDate(0, m, 0).Unix()
-		user.NextRefill = tn.AddDate(0, 1, 0).Unix()
+		user.Expire = tn.AddDate(0, m, 0).UTC()
+		user.NextRefill = tn.AddDate(0, 1, 0).UTC()
 	} else {
 		// not expired yet, start from previous expiration
-		user.Expire = te.AddDate(0, m, 0).Unix()
-		user.NextRefill = te.AddDate(0, 1, 0).Unix()
+		user.Expire = te.AddDate(0, m, 0).UTC()
+		user.NextRefill = te.AddDate(0, 1, 0).UTC()
 	}
 
 	o.Update(user)
