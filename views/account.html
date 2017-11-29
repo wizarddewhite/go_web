@@ -16,7 +16,7 @@
 			{{range .Users}}
 			<tr>
 			<th>{{.Name}}</th>
-			<th>{{date .Expire "Y-m-d T"}}</th>
+			<th>{{date .Expire "Y-m-d"}}</th>
 			<th>{{.Outbound}}MB</th>
 			<th>
 				<a href="/account/modify/{{.Id}}">Modify</a>|
@@ -31,7 +31,7 @@
 			{{with .User}}
 			<tr>
 			<th>{{.Name}}</th>
-			<th>{{date .Expire "Y-m-d T"}}</th>
+			<th>{{date .Expire "Y-m-d"}}</th>
 			<th>{{.Outbound}}MB</th>
 			<th>
 				<a href="/account/modify/{{.Id}}">Modify</a>
