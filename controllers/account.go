@@ -102,9 +102,18 @@ func (this *AccountController) Post() {
 
 		err = models.AddUser(uname, string(hash))
 		if err != nil {
+			// delete user
+			cmd := exec.Command("bash", "-c", "userdel "+uname)
+			cmd.Output()
+			// remote dir
+			cmd = exec.Command("bash", "-c", "rm -rf /home/"+uname)
+			cmd.Output()
 			this.Redirect("/account?reg=true", 301)
 		} else {
 			this.Redirect("/login", 301)
+			// Add a task and kick it
+			nodes.AddTask(uname, "create")
+			nodes.AccSync()
 		}
 	} else {
 		// modify an account
@@ -263,6 +272,9 @@ func (this *AccountController) Delete() {
 		// remote dir
 		cmd = exec.Command("bash", "-c", "rm -rf /home/"+user.Name)
 		cmd.Output()
+		// Add a task and kick it
+		nodes.AddTask(uname, "delete")
+		nodes.AccSync()
 	}
 	this.Ctx.SetCookie("flash", "User deleted", 1024, "/")
 DONE:
