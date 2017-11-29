@@ -204,6 +204,29 @@ func (this *AccountController) ResetBD() {
 	this.Redirect("/account", 301)
 }
 
+func (this *AccountController) ExpandOM() {
+	// only admin could invoke this
+	user := getLoginUser(&this.Controller)
+	if user == nil {
+		this.Ctx.SetCookie("flash", "Please Login first", 1024, "/")
+		this.Redirect("/login", 301)
+		return
+	} else if !user.IsAdmin {
+		this.Ctx.SetCookie("flash", "No page found", 1024, "/")
+		this.Redirect("/login", 301)
+		return
+	}
+
+	uid, _ := strconv.ParseInt(this.Ctx.Input.Params()["0"], 10, 64)
+	if uid != user.Id {
+		user = models.GetUserById(uid)
+	}
+	// Reset user bandwidth usage
+	models.ExpandUserExpire(user.Name, 1)
+	this.Ctx.SetCookie("flash", user.Name+" Expire Flashed", 1024, "/")
+	this.Redirect("/account", 301)
+}
+
 func (this *AccountController) Delete() {
 	var user *models.User
 	var uid int64

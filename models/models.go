@@ -339,6 +339,33 @@ func ModifyUserStat(name, inbound, outbound string) (error, bool) {
 	return nil, user.Outbound > user.Total
 }
 
+func ExpandUserExpire(name string, m int) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	tn := time.Now().UTC()
+	te := time.Unix(user.Expire, 0)
+	if tn.After(te) {
+		// already expired, start from now
+		user.Expire = tn.AddDate(0, m, 0).Unix()
+		user.NextRefill = tn.AddDate(0, 1, 0).Unix()
+	} else {
+		// not expired yet, start from previous expiration
+		user.Expire = te.AddDate(0, m, 0).Unix()
+		user.NextRefill = te.AddDate(0, 1, 0).Unix()
+	}
+
+	o.Update(user)
+	return nil
+}
+
 func ModifyUserSec(name, pwd string) error {
 	o := orm.NewOrm()
 
