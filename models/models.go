@@ -231,6 +231,10 @@ type User struct {
 	Inbound  float64
 	Outbound float64
 
+	// expire
+	Expire     int64
+	NextRefill int64
+
 	// key manage
 	KeyLimit int64 `orm:"default(2)"`
 	NumKeys  int64 `orm:"default(0)"`
@@ -322,11 +326,15 @@ func ModifyUserStat(name, inbound, outbound string) (error, bool) {
 		return err, false
 	}
 
-	var val float64
-	val, _ = strconv.ParseFloat(inbound, 64)
-	user.Inbound += val
-	val, _ = strconv.ParseFloat(outbound, 64)
-	user.Outbound += val
+	ib, _ := strconv.ParseFloat(inbound, 64)
+	ob, _ := strconv.ParseFloat(outbound, 64)
+	if ib == -1 && ob == -1 {
+		user.Inbound = 0
+		user.Outbound = 0
+	} else {
+		user.Inbound += ib
+		user.Outbound += ob
+	}
 	o.Update(user)
 	return nil, user.Outbound > user.Total
 }
