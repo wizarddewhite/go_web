@@ -350,7 +350,7 @@ func GetServiceNode() string {
 	var ip string
 	if len(cand_nodes) != 0 {
 		cand_mux.Lock()
-		ip = cand_nodes[0].Server.MainIP
+		ip = cand_nodes[0].Server.MainIP + cand_nodes[0].words
 		cand_mux.Unlock()
 	} else {
 		beego.Warn("running out of nodes")
