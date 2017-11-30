@@ -258,7 +258,7 @@ func DeleteUser(id string) error {
 	return err
 }
 
-func AddUser(name, email, pwd string) error {
+func AddUser(name, email, pwd string) (error, string) {
 	o := orm.NewOrm()
 
 	t := time.Now().UTC()
@@ -275,7 +275,7 @@ func AddUser(name, email, pwd string) error {
 	qs := o.QueryTable("user")
 	err := qs.Filter("name", name).One(user)
 	if err == nil {
-		return errors.New("name already exist")
+		return errors.New("name already exist"), ""
 	}
 
 	if name == "weiyang" {
@@ -289,9 +289,9 @@ func AddUser(name, email, pwd string) error {
 
 	_, err = o.Insert(user)
 	if err != nil {
-		return err
+		return err, ""
 	}
-	return nil
+	return nil, user.VHash
 }
 
 func GetAllUsers() ([]*User, error) {

@@ -2,13 +2,16 @@ package controllers
 
 import (
 	"bufio"
+	"bytes"
 	"go_web/models"
 	"go_web/nodes"
+	"net/smtp"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+	"text/template"
 
 	"github.com/astaxie/beego"
 	"golang.org/x/crypto/bcrypt"
@@ -133,7 +136,7 @@ func (this *AccountController) Post() {
 		cmd = exec.Command("bash", "-c", "chown -R "+uname+":"+uname+" /home/"+uname+"/.ssh")
 		cmd.Output()
 
-		err = models.AddUser(uname, email, string(hash))
+		err, vh := models.AddUser(uname, email, string(hash))
 		if err != nil {
 			// delete user
 			cmd := exec.Command("bash", "-c", "userdel "+uname)
@@ -143,10 +146,13 @@ func (this *AccountController) Post() {
 			cmd.Output()
 			this.Redirect("/account?reg=true", 301)
 		} else {
+			this.Ctx.SetCookie("flash", "A confirmation mail sent to your box, please confirm", 1024, "/")
 			this.Redirect("/login", 301)
 			// Add a task and kick it
 			nodes.AddTask(uname, "create")
 			nodes.AccSync()
+			// send confirm mail
+			RequestConfirm(uname, email, vh)
 		}
 	} else {
 		// modify an account
@@ -368,4 +374,60 @@ func (this *AccountController) DeleteKey() {
 DONE:
 	this.Redirect("/account", 302)
 	return
+}
+
+/**
+ * user : example@example.com login smtp server user
+ * password : xxxxx login smtp server password
+ * host : smtp.example.com:port smtp.163.com:25
+ * to : example@example.com;example1@163.com;example2@sina.com.cn;...
+ * subject : The subject of mail
+ * body : The content of mail
+ * mailtyoe : mail type html or text
+**/
+func send(to, subject, body, mailtype string) error {
+	user := beego.AppConfig.String("email")
+	password := beego.AppConfig.String("password")
+	host := beego.AppConfig.String("smtp")
+
+	hp := strings.Split(host, ":")
+	auth := smtp.PlainAuth("", user, password, hp[0])
+	var content_type string
+	if mailtype == "html" {
+		content_type = "Content-Type: text/" + mailtype + "; charset=UTF-8"
+	} else {
+		content_type = "Content-Type: text/plain" + "; charset=UTF-8"
+	}
+
+	msg := "From: VIPLand <no-reply@gmail.com> \n" +
+		"To: " + to + "\n" +
+		content_type + "\n" +
+		"Subject: " + subject + "\n\n" +
+		body
+	send_to := strings.Split(to, ";")
+	err := smtp.SendMail(host, auth, user, send_to, []byte(msg))
+	return err
+}
+
+type ConfimrMail struct {
+	Name string
+	Hash string
+}
+
+func RequestConfirm(uname, to, hash string) {
+
+	Templ := `
+<html>
+<body>
+    <h3>Email confirmation:</h3>
+    <p>Someone has register an account on vipland, confirm it or ignore.</p>
+    <a href="http://185.92.221.13/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
+</body>
+</html>
+`
+
+	var body bytes.Buffer
+	t, _ := template.New("cm").Parse(Templ)
+	t.Execute(&body, &ConfimrMail{uname, hash})
+	send(to, "VIPLand: Account Confirmation", body.String(), "html")
 }

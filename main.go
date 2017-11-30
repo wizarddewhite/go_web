@@ -18,6 +18,13 @@ func main() {
 		beego.Error("need key")
 		return
 	}
+
+	if len(beego.AppConfig.String("email")) == 0 ||
+		len(beego.AppConfig.String("password")) == 0 ||
+		len(beego.AppConfig.String("smtp")) == 0 {
+		beego.Error("need key")
+		return
+	}
 	orm.Debug = true
 	orm.RunSyncdb("default", false, true)
 
