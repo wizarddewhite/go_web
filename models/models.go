@@ -1,6 +1,10 @@
 package models
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"os"
 	"path"
@@ -224,6 +228,7 @@ type User struct {
 	Id      int64
 	Name    string `orm:"index"`
 	Email   string
+	VHash   string
 	IsAdmin bool
 	PWD     string
 
@@ -256,11 +261,15 @@ func DeleteUser(id string) error {
 func AddUser(name, email, pwd string) error {
 	o := orm.NewOrm()
 
+	t := time.Now().UTC()
+
 	user := &User{
-		Name:     name,
-		PWD:      pwd,
-		Email:    email,
-		KeyLimit: 2,
+		Name:       name,
+		PWD:        pwd,
+		Email:      email,
+		Expire:     t,
+		NextRefill: t,
+		KeyLimit:   2,
 	}
 
 	qs := o.QueryTable("user")
@@ -273,8 +282,10 @@ func AddUser(name, email, pwd string) error {
 		user.IsAdmin = true
 	}
 
-	user.Expire = time.Now().UTC()
-	user.NextRefill = time.Now().UTC()
+	curve := elliptic.P256()
+	private, err := ecdsa.GenerateKey(curve, rand.Reader)
+	pubKey := append(private.PublicKey.X.Bytes(), private.PublicKey.Y.Bytes()...)
+	user.VHash = hex.EncodeToString(pubKey)
 
 	_, err = o.Insert(user)
 	if err != nil {
