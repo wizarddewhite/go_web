@@ -49,7 +49,10 @@ func (this *LoginController) Post() {
 	autoLogin := this.Input().Get("autoLogin") == "on"
 
 	user := models.GetUser(uname)
-	if user != nil && user.Name == uname && pwd_same(user.PWD, pwd) {
+	if user != nil && user.VHash != "v" {
+		this.Ctx.SetCookie("flash", "Please verify your account first", 1024, "/")
+		this.Redirect("/", 301)
+	} else if user != nil && user.Name == uname && pwd_same(user.PWD, pwd) && user.VHash == "v" {
 		maxAge := 0
 		if autoLogin {
 			maxAge = 1<<31 - 1
