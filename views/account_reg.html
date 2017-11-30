@@ -8,6 +8,10 @@
     <input id="uname" class="form-control" placeholder="Enter account" name="uname">
   </div>
   <div class="form-group">
+    <label>Email</label>
+    <input id="email" class="form-control string email required" type="email" placeholder="Enter email" name="email">
+  </div>
+  <div class="form-group">
     <label>Password</label>
     <input id="pwd" type="password" class="form-control" placeholder="Password" name="pwd">
   </div>
@@ -30,7 +34,13 @@ function checkInput() {
 		return false;
 	}
 
-	return true;
+	var email = document.getElementById("email");
+
+	if (email.value.length == 0) {
+		alert("Please input your email");
+		return false;
+	}
+	return true
 }
 </script>
 <div>
