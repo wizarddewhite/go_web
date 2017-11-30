@@ -60,6 +60,13 @@ func validateEmail(email string) bool {
 	return Re.MatchString(email)
 }
 
+func (this *AccountController) ConfirmEmail() {
+	uname := this.Input().Get("uname")
+	has := this.Input().Get("hash")
+	this.Ctx.SetCookie("flash", "Email Confirmed!", 1024, "/")
+	this.Redirect("/login", 301)
+}
+
 func (this *AccountController) Post() {
 	uname := this.Input().Get("uname")
 	email := this.Input().Get("email")
