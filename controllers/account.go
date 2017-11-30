@@ -6,6 +6,7 @@ import (
 	"go_web/nodes"
 	"os"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -54,8 +55,14 @@ func (this *AccountController) Get() {
 	}
 }
 
+func validateEmail(email string) bool {
+	Re := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	return Re.MatchString(email)
+}
+
 func (this *AccountController) Post() {
 	uname := this.Input().Get("uname")
+	email := this.Input().Get("email")
 	pwd := this.Input().Get("pwd")
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	uid := this.Input().Get("uid")
@@ -70,6 +77,19 @@ func (this *AccountController) Post() {
 		if !isAdmin {
 			this.Ctx.SetCookie("flash", "Contact Admin to register", 1024, "/")
 			this.Redirect("/", 301)
+			return
+		}
+
+		// check uname, pwd, email
+		if len(uname) == 0 || len(pwd) == 0 || len(email) == 0 {
+			this.Ctx.SetCookie("flash", "Check your name, password or email", 1024, "/")
+			this.Redirect("/account?reg=true", 301)
+			return
+		}
+
+		if !validateEmail(email) {
+			this.Ctx.SetCookie("flash", "Check your email", 1024, "/")
+			this.Redirect("/account?reg=true", 301)
 			return
 		}
 
