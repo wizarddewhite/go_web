@@ -121,7 +121,7 @@ func (this *AccountController) Post() {
 		cmd = exec.Command("bash", "-c", "chown -R "+uname+":"+uname+" /home/"+uname+"/.ssh")
 		cmd.Output()
 
-		err = models.AddUser(uname, string(hash))
+		err = models.AddUser(uname, email, string(hash))
 		if err != nil {
 			// delete user
 			cmd := exec.Command("bash", "-c", "userdel "+uname)

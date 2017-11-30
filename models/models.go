@@ -253,12 +253,13 @@ func DeleteUser(id string) error {
 	return err
 }
 
-func AddUser(name, pwd string) error {
+func AddUser(name, email, pwd string) error {
 	o := orm.NewOrm()
 
 	user := &User{
 		Name:     name,
 		PWD:      pwd,
+		Email:    email,
 		KeyLimit: 2,
 	}
 
