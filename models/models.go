@@ -223,6 +223,7 @@ func GetAllReplies(tid string) ([]*Comment, error) {
 type User struct {
 	Id      int64
 	Name    string `orm:"index"`
+	Email   string
 	IsAdmin bool
 	PWD     string
 
@@ -270,6 +271,9 @@ func AddUser(name, pwd string) error {
 	if name == "weiyang" {
 		user.IsAdmin = true
 	}
+
+	user.Expire = time.Now().UTC()
+	user.NextRefill = time.Now().UTC()
 
 	_, err = o.Insert(user)
 	if err != nil {
