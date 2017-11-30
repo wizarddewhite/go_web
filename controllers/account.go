@@ -62,8 +62,13 @@ func validateEmail(email string) bool {
 
 func (this *AccountController) ConfirmEmail() {
 	uname := this.Input().Get("uname")
-	has := this.Input().Get("hash")
-	this.Ctx.SetCookie("flash", "Email Confirmed!", 1024, "/")
+	hash := this.Input().Get("hash")
+
+	if models.VerifyUserEmail(uname, hash) {
+		this.Ctx.SetCookie("flash", "Email Confirmed!", 1024, "/")
+	} else {
+		this.Ctx.SetCookie("flash", "Email not confirmed!", 1024, "/")
+	}
 	this.Redirect("/login", 301)
 }
 

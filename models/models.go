@@ -331,6 +331,28 @@ func GetUserById(id int64) *User {
 	}
 }
 
+func VerifyUserEmail(name, hash string) bool {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return false
+	}
+
+	if user.VHash == "v" {
+		return true
+	} else if user.VHash == hash {
+		user.VHash = "v"
+		o.Update(user)
+		return true
+	}
+
+	return false
+}
+
 func ModifyUserStat(name, inbound, outbound string) (error, bool) {
 	o := orm.NewOrm()
 
