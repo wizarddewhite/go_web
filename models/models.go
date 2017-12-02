@@ -258,17 +258,18 @@ func DeleteUser(id string) error {
 	return err
 }
 
+var mark_t = time.Date(2009, 11, 17, 20, 34, 58, 0, time.UTC)
+var check_t = time.Date(2009, 11, 17, 20, 34, 59, 0, time.UTC)
+
 func AddUser(name, email, pwd string) (error, string) {
 	o := orm.NewOrm()
-
-	t := time.Now().UTC()
 
 	user := &User{
 		Name:       name,
 		PWD:        pwd,
 		Email:      email,
-		Expire:     t,
-		NextRefill: t,
+		Expire:     mark_t,
+		NextRefill: mark_t,
 		KeyLimit:   2,
 	}
 
@@ -301,6 +302,17 @@ func GetAllUsers() ([]*User, error) {
 	qs := o.QueryTable("user")
 	_, err := qs.All(&users)
 	return users, err
+}
+
+func CheckAllUsers() []*User {
+	o := orm.NewOrm()
+
+	now := time.Now().UTC()
+
+	users := make([]*User, 0)
+	qs := o.QueryTable("user")
+	qs.Filter("expire__gt", check_t).Filter("expire_lt", now).All(&users)
+	return users
 }
 
 func GetUser(name string) *User {
