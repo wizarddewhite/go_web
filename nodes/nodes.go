@@ -602,4 +602,19 @@ func UserSync() {
 	}
 
 	// user Refill, reset usage and enable it if disabled
+	ru, err := models.RefillUsers()
+	if err == nil {
+		for _, u := range ru {
+			if u.Outbound > u.Total {
+				// add to ssh group
+				cmd := exec.Command("bash", "-c",
+					"usermod -g "+u.Name+" -G ssh "+u.Name)
+				cmd.Output()
+
+				// Add it to task list
+				AddTask(u.Name, "enable")
+			}
+			models.RefillUser(u)
+		}
+	}
 }

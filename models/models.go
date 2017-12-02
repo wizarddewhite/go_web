@@ -318,6 +318,25 @@ func SetExpiredUsers() ([]*User, error) {
 	return users, err
 }
 
+func RefillUser(user *User) {
+	o := orm.NewOrm()
+	user.NextRefill = user.NextRefill.AddDate(0, 1, 0).UTC()
+	user.Inbound = 0
+	user.Outbound = 0
+	o.Update(user)
+}
+
+func RefillUsers() ([]*User, error) {
+	o := orm.NewOrm()
+
+	now := time.Now().UTC()
+
+	users := make([]*User, 0)
+	qs := o.QueryTable("user")
+	_, err := qs.Filter("expire__gt", check_t).Filter("nextrefill__lt", now).All(&users)
+	return users, err
+}
+
 func GetUser(name string) *User {
 	o := orm.NewOrm()
 
