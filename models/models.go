@@ -304,15 +304,18 @@ func GetAllUsers() ([]*User, error) {
 	return users, err
 }
 
-func CheckAllUsers() []*User {
+func SetExpiredUsers() ([]*User, error) {
 	o := orm.NewOrm()
 
 	now := time.Now().UTC()
 
 	users := make([]*User, 0)
 	qs := o.QueryTable("user")
-	qs.Filter("expire__gt", check_t).Filter("expire_lt", now).All(&users)
-	return users
+	_, err := qs.Filter("expire__gt", check_t).Filter("expire__lt", now).All(&users)
+	if err == nil {
+		qs.Filter("expire__gt", check_t).Filter("expire__lt", now).Update(orm.Params{"expire": mark_t, "nextrefill": mark_t})
+	}
+	return users, err
 }
 
 func GetUser(name string) *User {

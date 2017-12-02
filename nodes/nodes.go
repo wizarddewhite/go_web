@@ -3,6 +3,7 @@ package nodes
 import (
 	"bytes"
 	"errors"
+	"go_web/models"
 	"math/rand"
 	"net"
 	"os/exec"
@@ -490,6 +491,10 @@ func cleanup_nodes() {
 
 	index = 0
 	go cleanup_nodes()
+
+	// refresh user state based on expiration
+	UserSync()
+
 	// kick the Task handling
 	go AccSync()
 }
@@ -579,4 +584,22 @@ func AccSync() {
 	as_cond.L.Lock()
 	as_cond.Signal()
 	as_cond.L.Unlock()
+}
+
+func UserSync() {
+	// user expired, disable account
+	eu, err := models.SetExpiredUsers()
+	if err == nil {
+		for _, u := range eu {
+			// remove from ssh group
+			cmd := exec.Command("bash", "-c",
+				"usermod -g "+u.Name+" -G "+u.Name+" "+u.Name)
+			cmd.Output()
+
+			// Add it to task list
+			AddTask(u.Name, "disable")
+		}
+	}
+
+	// user Refill, reset usage and enable it if disabled
 }
