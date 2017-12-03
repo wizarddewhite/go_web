@@ -187,6 +187,9 @@ func (this *AccountController) Post() {
 			}
 			// update the db
 			models.ModifyUserKey(uname, 1)
+			// Add a task and kick it
+			nodes.AddTask(user.Name, "key")
+			nodes.AccSync()
 		}
 		this.Redirect("/account", 301)
 	}
@@ -370,6 +373,9 @@ func (this *AccountController) DeleteKey() {
 	}
 	// update the db
 	models.ModifyUserKey(user.Name, -1)
+	// Add a task and kick it
+	nodes.AddTask(user.Name, "key")
+	nodes.AccSync()
 
 DONE:
 	this.Redirect("/account", 302)
