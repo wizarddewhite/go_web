@@ -88,13 +88,6 @@ func (this *AccountController) Post() {
 			return
 		}
 
-		_, isAdmin := checkAccount(this.Ctx)
-		if !isAdmin {
-			this.Ctx.SetCookie("flash", "Contact Admin to register", 1024, "/")
-			this.Redirect("/", 301)
-			return
-		}
-
 		// check uname, pwd, email
 		if len(uname) == 0 || len(pwd) == 0 || len(email) == 0 {
 			this.Ctx.SetCookie("flash", "Check your name, password or email", 1024, "/")
