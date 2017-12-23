@@ -231,6 +231,7 @@ type User struct {
 	VHash   string
 	IsAdmin bool
 	PWD     string
+	UUID    string
 
 	// bandwidth
 	Total    float64
@@ -260,6 +261,26 @@ func DeleteUser(id string) error {
 
 var mark_t = time.Date(2009, 11, 17, 20, 34, 58, 0, time.UTC)
 var check_t = time.Date(2009, 11, 17, 20, 34, 59, 0, time.UTC)
+var byteGroups = []int{8, 4, 4, 4, 12}
+
+type UUID [16]byte
+
+func (u *UUID) Bytes() []byte {
+	return u[:]
+}
+
+func (u *UUID) String() string {
+	bytes := u.Bytes()
+	result := hex.EncodeToString(bytes[0 : byteGroups[0]/2])
+	start := byteGroups[0] / 2
+	for i := 1; i < len(byteGroups); i++ {
+		nBytes := byteGroups[i] / 2
+		result += "-"
+		result += hex.EncodeToString(bytes[start : start+nBytes])
+		start += nBytes
+	}
+	return result
+}
 
 func AddUser(name, email, pwd string) (error, string) {
 	o := orm.NewOrm()
@@ -279,7 +300,7 @@ func AddUser(name, email, pwd string) (error, string) {
 		return errors.New("name already exist"), ""
 	}
 
-	if name == "weiyang" {
+	if name == "admin" {
 		user.IsAdmin = true
 	}
 
@@ -287,6 +308,10 @@ func AddUser(name, email, pwd string) (error, string) {
 	private, err := ecdsa.GenerateKey(curve, rand.Reader)
 	pubKey := append(private.PublicKey.X.Bytes(), private.PublicKey.Y.Bytes()...)
 	user.VHash = hex.EncodeToString(pubKey)
+
+	uuid := new(UUID)
+	rand.Read(uuid.Bytes())
+	user.UUID = uuid.String()
 
 	_, err = o.Insert(user)
 	if err != nil {
