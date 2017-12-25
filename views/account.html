@@ -8,6 +8,7 @@
 			<th>Name</th>
 			<th>Expire</th>
 			<th>Used</th>
+			<th>UUID</th>
 			<th>Action</th>
 		</tr>
 	</thead>
@@ -18,6 +19,7 @@
 			<th>{{.Name}}</th>
 			<th>{{date .Expire "Y-m-d"}}</th>
 			<th>{{.Outbound}}MB</th>
+			<th>{{.UUID}}</th>
 			<th>
 				<a href="/account/modify/{{.Id}}">Modify</a>|
 				<a href="/account/resetbd/{{.Id}}">Reset</a>|
@@ -33,6 +35,7 @@
 			<th>{{.Name}}</th>
 			<th>{{date .Expire "Y-m-d"}}</th>
 			<th>{{.Outbound}}MB</th>
+			<th>{{.UUID}}</th>
 			<th>
 				<a href="/account/modify/{{.Id}}">Modify</a>
 			</th>
