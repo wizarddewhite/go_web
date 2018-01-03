@@ -141,6 +141,10 @@ func (this *AccountController) Post() {
 		} else {
 			this.Ctx.SetCookie("flash", "A confirmation mail sent to your box, please confirm", 1024, "/")
 			this.Redirect("/login", 301)
+			// Add an entry to local config
+			sub_cmd := "/root/tasks/add_config " + uname + " " + uuid + " && service v2ray restart"
+			cmd := exec.Command("bash", "-c", sub_cmd)
+			cmd.Start()
 			// Add a task and kick it
 			nodes.AddTask(uname, uuid, "add_config")
 			nodes.AccSync()
@@ -304,6 +308,10 @@ func (this *AccountController) Delete() {
 		// remote dir
 		cmd = exec.Command("bash", "-c", "rm -rf /home/"+user.Name)
 		cmd.Output()
+		// Remove entry in local config
+		sub_cmd := "/root/tasks/del_config " + user.Name + " && service v2ray restart"
+		cmd = exec.Command("bash", "-c", sub_cmd)
+		cmd.Start()
 		// Add a task and kick it
 		nodes.AddTask(user.Name, "", "del_config")
 		nodes.AccSync()
