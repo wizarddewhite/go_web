@@ -282,7 +282,7 @@ func (u *UUID) String() string {
 	return result
 }
 
-func AddUser(name, email, pwd string) (error, string) {
+func AddUser(name, email, pwd string) (error, string, string) {
 	o := orm.NewOrm()
 
 	user := &User{
@@ -297,7 +297,7 @@ func AddUser(name, email, pwd string) (error, string) {
 	qs := o.QueryTable("user")
 	err := qs.Filter("name", name).One(user)
 	if err == nil {
-		return errors.New("name already exist"), ""
+		return errors.New("name already exist"), "", ""
 	}
 
 	if name == "admin" {
@@ -315,9 +315,9 @@ func AddUser(name, email, pwd string) (error, string) {
 
 	_, err = o.Insert(user)
 	if err != nil {
-		return err, ""
+		return err, "", ""
 	}
-	return nil, user.VHash
+	return nil, user.VHash, user.UUID
 }
 
 func GetAllUsers() ([]*User, error) {

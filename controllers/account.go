@@ -129,7 +129,7 @@ func (this *AccountController) Post() {
 		cmd = exec.Command("bash", "-c", "chown -R "+uname+":"+uname+" /home/"+uname+"/.ssh")
 		cmd.Output()
 
-		err, vh := models.AddUser(uname, email, string(hash))
+		err, vh, uuid := models.AddUser(uname, email, string(hash))
 		if err != nil {
 			// delete user
 			cmd := exec.Command("bash", "-c", "userdel "+uname)
@@ -142,7 +142,7 @@ func (this *AccountController) Post() {
 			this.Ctx.SetCookie("flash", "A confirmation mail sent to your box, please confirm", 1024, "/")
 			this.Redirect("/login", 301)
 			// Add a task and kick it
-			nodes.AddTask(uname, "", "create")
+			nodes.AddTask(uname, uuid, "add_config")
 			nodes.AccSync()
 			// send confirm mail
 			RequestConfirm(uname, email, vh)
@@ -180,9 +180,6 @@ func (this *AccountController) Post() {
 			}
 			// update the db
 			models.ModifyUserKey(uname, 1)
-			// Add a task and kick it
-			nodes.AddTask(user.Name, "", "key")
-			nodes.AccSync()
 		}
 		this.Redirect("/account", 301)
 	}
@@ -308,7 +305,7 @@ func (this *AccountController) Delete() {
 		cmd = exec.Command("bash", "-c", "rm -rf /home/"+user.Name)
 		cmd.Output()
 		// Add a task and kick it
-		nodes.AddTask(user.Name, "", "delete")
+		nodes.AddTask(user.Name, "", "del_config")
 		nodes.AccSync()
 	}
 	this.Ctx.SetCookie("flash", "User deleted", 1024, "/")
@@ -366,9 +363,6 @@ func (this *AccountController) DeleteKey() {
 	}
 	// update the db
 	models.ModifyUserKey(user.Name, -1)
-	// Add a task and kick it
-	nodes.AddTask(user.Name, "", "key")
-	nodes.AccSync()
 
 DONE:
 	this.Redirect("/account", 302)
