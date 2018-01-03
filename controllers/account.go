@@ -422,7 +422,7 @@ func RequestConfirm(uname, to, hash string) {
 <body>
     <h3>Email confirmation:</h3>
     <p>Someone has register an account on vipland, confirm it or ignore.</p>
-    <a href="http://185.92.221.13/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
+    <a href="http://freedomland.tk/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
 </body>
 </html>
 `
