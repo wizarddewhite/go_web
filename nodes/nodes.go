@@ -52,7 +52,8 @@ var as_cond *sync.Cond
 
 type Task struct {
 	Name   string
-	Action string /* create, delete, enable, disable, key */
+	UUID   string
+	Action string /* create, delete, enable, disable, key, add_config, del_config */
 }
 
 var task_mux sync.Mutex
@@ -523,9 +524,9 @@ func Cleanup() {
 	}
 }
 
-func AddTask(uname, action string) {
+func AddTask(uname, uuid, action string) {
 	task_mux.Lock()
-	task_list = append(task_list, Task{uname, action})
+	task_list = append(task_list, Task{uname, uuid, action})
 	task_mux.Unlock()
 }
 
@@ -542,6 +543,10 @@ func account_sync() {
 				sub_cmd = "/root/tasks/create_user.sh " + n.Server.MainIP + " " + t.Name
 			case "delete":
 				sub_cmd = "/root/tasks/delete_user.sh " + n.Server.MainIP + " " + t.Name
+			case "add_config":
+				sub_cmd = "/root/tasks/add_config.sh " + n.Server.MainIP + " " + t.Name + " " + t.UUID
+			case "del_config":
+				sub_cmd = "/root/tasks/del_config.sh " + n.Server.MainIP + " " + t.Name
 			case "enable":
 				sub_cmd = "/root/tasks/enable.sh " + n.Server.MainIP + " " + t.Name
 			case "disable":
@@ -597,7 +602,7 @@ func UserSync() {
 			cmd.Output()
 
 			// Add it to task list
-			AddTask(u.Name, "disable")
+			AddTask(u.Name, u.UUID, "disable")
 		}
 	}
 
@@ -612,7 +617,7 @@ func UserSync() {
 				cmd.Output()
 
 				// Add it to task list
-				AddTask(u.Name, "enable")
+				AddTask(u.Name, u.UUID, "enable")
 			}
 			models.RefillUser(u)
 		}

@@ -90,7 +90,7 @@ func (this *StatisticController) Update() {
 			cmd.Output()
 
 			// Add it to task list
-			nodes.AddTask(stat.Name, "disable")
+			nodes.AddTask(stat.Name, "", "disable")
 		}
 	}
 
