@@ -21,4 +21,5 @@ func init() {
 	beego.AutoRouter(&controllers.AccountController{})
 
 	beego.Router("/node", &controllers.NodeController{})
+	beego.Router("/node/renew_k", &controllers.NodeController{}, "get:Renew")
 }
