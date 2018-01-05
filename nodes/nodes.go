@@ -553,6 +553,8 @@ func account_sync() {
 				sub_cmd = "/root/tasks/disable.sh " + n.Server.MainIP + " " + t.Name
 			case "key":
 				sub_cmd = "/root/tasks/key.sh " + n.Server.MainIP + " " + t.Name
+			case "renew_cert":
+				sub_cmd = "/root/tasks/renew_cert.sh " + n.Server.MainIP
 			}
 			done := make(chan error, 1)
 			cmd := exec.Command("bash", "-c", sub_cmd)

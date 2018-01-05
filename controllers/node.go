@@ -18,6 +18,8 @@ func (this *NodeController) Get() {
 func (this *NodeController) Renew() {
 	if this.Ctx.Input.IP() == "127.0.0.1" {
 		this.Data["json"] = "{\"Status\":\"ok\"}"
+		nodes.AddTask("", "", "renew_cert")
+		nodes.AccSync()
 	} else {
 		this.Data["json"] = "{\"Status\":\"err\"}"
 	}
