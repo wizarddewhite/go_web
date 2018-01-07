@@ -1,0 +1,21 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+	<p>Click on the link below to download the software:</p>
+	<table style="width:100%">
+          <tr>
+            <th>OS</th>
+            <th>Download</th>
+          </tr>
+          <tr>
+            <td>Mac 10.13.2</td> 
+            <td><a href="/static/img/Freeland-darwin-x64.zip" download>Download</a></td>
+          </tr>
+          <tr>
+            <td>Windows 10</td> 
+            <td><a href="/static/img/Freeland-1.0.0-win.rar" download>Download</a></td>
+          </tr>
+        </table>
+<div>
+{{end}}

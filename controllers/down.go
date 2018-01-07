@@ -9,7 +9,7 @@ type DownController struct {
 }
 
 func (this *DownController) Get() {
-	this.TplName = "home.html"
+	this.TplName = "download.html"
 	this.Data["Title"] = "Download"
 	this.Data["IsDown"] = true
 	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
