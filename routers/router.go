@@ -22,4 +22,7 @@ func init() {
 
 	beego.Router("/node", &controllers.NodeController{})
 	beego.Router("/node/renew_k", &controllers.NodeController{}, "get:Renew")
+
+	beego.Router("/download", &controllers.DownController{})
+	beego.Router("/tutorial", &controllers.TutoController{})
 }
