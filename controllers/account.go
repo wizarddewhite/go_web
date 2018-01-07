@@ -400,7 +400,7 @@ func send(to, subject, body, mailtype string) error {
 		content_type = "Content-Type: text/plain" + "; charset=UTF-8"
 	}
 
-	msg := "From: VIPLand <no-reply@gmail.com> \n" +
+	msg := "From: Freedomland <no-reply@gmail.com> \n" +
 		"To: " + to + "\n" +
 		content_type + "\n" +
 		"Subject: " + subject + "\n\n" +
