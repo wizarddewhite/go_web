@@ -9,7 +9,7 @@ type TutoController struct {
 }
 
 func (this *TutoController) Get() {
-	this.TplName = "home.html"
+	this.TplName = "tuto.html"
 	this.Data["Title"] = "Tutorial"
 	this.Data["IsTuto"] = true
 	this.Data["IsLogin"], this.Data["IsAdmin"] = checkAccount(this.Ctx)
