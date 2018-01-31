@@ -77,7 +77,7 @@ func (this *AccountController) ConfirmEmail() {
 
 func (this *AccountController) Post() {
 	uname := this.Input().Get("uname")
-	email := this.Input().Get("email")
+	email := strings.ToLower(this.Input().Get("email"))
 	pwd := this.Input().Get("pwd")
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	uid := this.Input().Get("uid")
@@ -421,7 +421,7 @@ func RequestConfirm(uname, to, hash string) {
 <html>
 <body>
     <h3>Email confirmation:</h3>
-    <p>Someone has register an account on vipland, confirm it or ignore.</p>
+    <p>Someone has register an account on Freedomland, confirm it or ignore.</p>
     <a href="http://freedomland.tk/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
 </body>
 </html>
@@ -430,5 +430,5 @@ func RequestConfirm(uname, to, hash string) {
 	var body bytes.Buffer
 	t, _ := template.New("cm").Parse(Templ)
 	t.Execute(&body, &ConfimrMail{uname, hash})
-	send(to, "VIPLand: Account Confirmation", body.String(), "html")
+	send(to, "Freedomland: Account Confirmation", body.String(), "html")
 }
