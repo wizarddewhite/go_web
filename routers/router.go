@@ -9,6 +9,8 @@ import (
 func init() {
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/login", &controllers.LoginController{})
+	beego.Router("/forget", &controllers.ForgetController{})
+	beego.Router("/reset", &controllers.ResetController{})
 	//beego.Router("/category", &controllers.CategoryController{})
 	//beego.Router("/topic", &controllers.TopicController{})
 	//beego.AutoRouter(&controllers.TopicController{})

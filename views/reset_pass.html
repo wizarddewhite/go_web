@@ -1,0 +1,27 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+<form method="POST" action="/reset">
+  <input type="hidden" name="uname" value="{{.User}}">
+  <input type="hidden" name="hash" value="{{.Hash}}">
+  <div class="form-group">
+    <label>Password</label>
+    <input id="pwd" type="password" class="form-control" placeholder="Password" name="pwd">
+  </div>
+  <button type="submit" class="btn btn-default" onclick="return checkInput()">Reset</button>
+</form>
+
+<script>
+function checkInput() {
+       var pwd = document.getElementById("pwd");
+
+       if (pwd.value.length == 0) {
+               alert("Please input your password");
+               return false;
+       }
+       return true
+}
+</script>
+<div>
+{{end}}

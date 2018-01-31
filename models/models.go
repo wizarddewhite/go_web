@@ -229,6 +229,7 @@ type User struct {
 	Name    string `orm:"index"`
 	Email   string
 	VHash   string
+	Reset   string
 	IsAdmin bool
 	PWD     string
 	UUID    string
@@ -390,7 +391,7 @@ func GetUserById(id int64) *User {
 	}
 }
 
-func VerifyUserEmail(name, hash string) bool {
+func VerifyUserEmail(name, hash string) error {
 	o := orm.NewOrm()
 
 	user := new(User)
@@ -398,18 +399,18 @@ func VerifyUserEmail(name, hash string) bool {
 	qs := o.QueryTable("user")
 	err := qs.Filter("name", name).One(user)
 	if err == orm.ErrNoRows {
-		return false
+		return errors.New("Email not confirmed!")
 	}
 
 	if user.VHash == "v" {
-		return true
+		return errors.New("Email already confirmed!")
 	} else if user.VHash == hash {
 		user.VHash = "v"
 		o.Update(user)
-		return true
+		return nil
 	}
 
-	return false
+	return errors.New("Email not confirmed!")
 }
 
 func ModifyUserStat(name, inbound, outbound string) (error, bool) {
@@ -477,6 +478,46 @@ func ModifyUserSec(name, pwd string) error {
 	user.PWD = pwd
 	o.Update(user)
 	return nil
+}
+
+func GetUserResetHash(name string) (string, string) {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return "", ""
+	}
+
+	curve := elliptic.P256()
+	private, err := ecdsa.GenerateKey(curve, rand.Reader)
+	pubKey := append(private.PublicKey.X.Bytes(), private.PublicKey.Y.Bytes()...)
+	user.Reset = hex.EncodeToString(pubKey)
+	o.Update(user)
+	return user.Email, user.Reset
+}
+
+func ResetUser(name, hash, pwd string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return errors.New("No such user!")
+	}
+
+	if user.Reset == hash {
+		user.PWD = pwd
+		user.Reset = "v"
+		o.Update(user)
+		return nil
+	}
+
+	return errors.New("Reset link is not valid!")
 }
 
 func ModifyUserKey(name string, val int64) error {

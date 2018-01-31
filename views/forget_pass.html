@@ -1,0 +1,26 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container" >
+<form method="POST" action="/forget">
+  <div class="form-group">
+    <label>Name</label>
+    <input id="uname" class="form-control" placeholder="Enter account" name="uname">
+  </div>
+  <button type="submit" class="btn btn-default" onclick="return checkInput()">Request Reset</button>
+</form>
+
+<script>
+function checkInput() {
+       var uname = document.getElementById("uname");
+
+       if (uname.value.length == 0) {
+               alert("Please input your user name");
+               return false;
+       }
+
+       return true
+}
+</script>
+<div>
+{{end}}

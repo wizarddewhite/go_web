@@ -67,10 +67,11 @@ func (this *AccountController) ConfirmEmail() {
 	uname := this.Input().Get("uname")
 	hash := this.Input().Get("hash")
 
-	if models.VerifyUserEmail(uname, hash) {
+	err := models.VerifyUserEmail(uname, hash)
+	if err == nil {
 		this.Ctx.SetCookie("flash", "Email Confirmed!", 1024, "/")
 	} else {
-		this.Ctx.SetCookie("flash", "Email not confirmed!", 1024, "/")
+		this.Ctx.SetCookie("flash", err.Error(), 1024, "/")
 	}
 	this.Redirect("/login", 301)
 }
@@ -137,6 +138,7 @@ func (this *AccountController) Post() {
 			// remote dir
 			cmd = exec.Command("bash", "-c", "rm -rf /home/"+uname)
 			cmd.Output()
+			this.Ctx.SetCookie("flash", err.Error(), 1024, "/")
 			this.Redirect("/account?reg=true", 301)
 		} else {
 			this.Ctx.SetCookie("flash", "A confirmation mail sent to your box, please confirm", 1024, "/")
@@ -430,5 +432,8 @@ func RequestConfirm(uname, to, hash string) {
 	var body bytes.Buffer
 	t, _ := template.New("cm").Parse(Templ)
 	t.Execute(&body, &ConfimrMail{uname, hash})
-	send(to, "Freedomland: Account Confirmation", body.String(), "html")
+	err := send(to, "Freedomland: Account Confirmation", body.String(), "html")
+	if err != nil {
+		beego.Error(err)
+	}
 }
