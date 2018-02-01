@@ -457,7 +457,6 @@ func ExpandUserExpire(name string, m int) error {
 	} else {
 		// not expired yet, start from previous expiration
 		user.Expire = te.AddDate(0, m, 0).UTC()
-		user.NextRefill = te.AddDate(0, 1, 0).UTC()
 	}
 
 	o.Update(user)
