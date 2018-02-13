@@ -171,9 +171,16 @@ func (this *AccountController) Post() {
 		// add a new key
 		new_key := this.Input().Get("key")
 		user := models.GetUser(uname)
-		if len(new_key) != 0 && user != nil && user.NumKeys < user.KeyLimit {
+		if len(new_key) != 0 && user != nil {
+			if user.NumKeys >= user.KeyLimit {
+				this.Ctx.SetCookie("flash", "You could have only "+strconv.FormatInt(user.KeyLimit, 10)+" keys", 1024, "/")
+				this.Redirect("/account/modify/"+uid, 301)
+				return
+			}
+
 			file, err := os.OpenFile("/home/"+uname+"/.ssh/authorized_keys", os.O_APPEND|os.O_WRONLY, 0600)
 			if err != nil {
+				this.Ctx.SetCookie("flash", "Failed to access your key file", 1024, "/")
 				this.Redirect("/account/modify/"+uid, 301)
 				return
 			}
@@ -181,10 +188,12 @@ func (this *AccountController) Post() {
 			defer file.Close()
 
 			if _, err = file.WriteString(new_key + "\n"); err != nil {
+				this.Ctx.SetCookie("flash", "Failed to write your key file", 1024, "/")
 				this.Redirect("/account/modify/"+uid, 301)
 				return
 			}
 			// update the db
+			this.Ctx.SetCookie("flash", "Your key is added", 1024, "/")
 			models.ModifyUserKey(uname, 1)
 		}
 		this.Redirect("/account", 301)
@@ -216,6 +225,11 @@ func (this *AccountController) Modify() {
 	this.Data["Title"] = "Modify account"
 	this.Data["Account"] = user
 	this.Data["Uid"] = user.Id
+	ck, err := this.Ctx.Request.Cookie("flash")
+	if err == nil {
+		this.Data["Flash"] = ck.Value
+		this.Ctx.SetCookie("flash", "", -1, "/")
+	}
 
 	// retrieve keys
 	file, err := os.Open("/home/" + user.Name + "/.ssh/authorized_keys")
