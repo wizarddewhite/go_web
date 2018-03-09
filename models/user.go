@@ -27,6 +27,8 @@ type User struct {
 	PWD     string
 	UUID    string
 
+	Level string
+
 	// expire
 	Expire     time.Time
 	NextRefill time.Time
@@ -51,6 +53,7 @@ func AddUser(name, email, pwd string) (error, string, string) {
 		Name:       name,
 		PWD:        pwd,
 		Email:      email,
+		Level:      "none",
 		Expire:     mark_t,
 		NextRefill: mark_t,
 	}
