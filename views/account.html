@@ -8,6 +8,7 @@
 			<th>Name</th>
 			<th>Expire</th>
 			<th>UUID</th>
+			<th>Level</th>
 			<th>Action</th>
 		</tr>
 	</thead>
@@ -18,6 +19,7 @@
 			<th>{{.Name}}</th>
 			<th>{{date .Expire "Y-m-d"}}</th>
 			<th>{{.UUID}}</th>
+			<th>{{.Level}}</th>
 			<th>
 				<a href="/account/edit/{{.Id}}">Modify</a>|
 				<a href="/account/resetbd/{{.Id}}">Reset</a>|
