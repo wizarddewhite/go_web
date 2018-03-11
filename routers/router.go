@@ -16,4 +16,6 @@ func init() {
 	beego.AutoRouter(&controllers.AccountController{})
 
 	beego.Router("/permit", &controllers.PermitController{})
+	beego.Router("/plan", &controllers.PlanController{})
+	beego.Router("/download", &controllers.DownloadController{})
 }

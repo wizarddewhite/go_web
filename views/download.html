@@ -1,0 +1,21 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+        <p>Click on the link below to download the software:</p>
+        <table style="width:100%">
+          <tr>
+            <th>OS</th>
+            <th>Download</th>
+          </tr>
+          <tr>
+            <td>Mac 10.13.2</td>
+            <td><a href="/static/img/gapseeker.zip" download>Download</a></td>
+          </tr>
+          <tr>
+            <td>Windows 7/10</td>
+            <td><a href="/static/img/gapseeker.rar" download>Download</a></td>
+          </tr>
+        </table>
+<div>
+{{end}}

@@ -1,11 +1,10 @@
 <div class="navbar navbar-default">
     <div class="container">
-            <a class="navbar-brand" href="/">Web Frame</a>
+            <a class="navbar-brand" href="/">Gap Seeker</a>
 	    <div>
 	    <ul class="nav navbar-nav">
-		    {{if .IsAdmin}}
-		    <li {{if .IsCategory}}class="active"{{end}}><a href="/">Category</a></li>
-		    {{end}}
+		    <li {{if .IsPlan}}class="active"{{end}}><a href="/plan">Plan</a></li>
+		    <li {{if .IsDownload}}class="active"{{end}}><a href="/download">Download</a></li>
 	    </ul>
 	    </div>
 
