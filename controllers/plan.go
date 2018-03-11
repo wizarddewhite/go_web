@@ -12,4 +12,5 @@ func (this *PlanController) Get() {
 	this.TplName = "plan.html"
 	this.Data["Title"] = "Plan"
 	this.Data["IsPlan"] = true
+	getLoginUser(&this.Controller)
 }
