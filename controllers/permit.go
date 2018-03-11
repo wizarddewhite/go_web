@@ -24,7 +24,7 @@ func (this *PermitController) Get() {
 	if u != nil && u.UUID == uuid {
 		switch level := u.Level; level {
 		case "beginner":
-			perm = Perm{2, 5}
+			perm = Perm{3, 3}
 		case "standard":
 			perm = Perm{5, 10}
 		case "advanced":
