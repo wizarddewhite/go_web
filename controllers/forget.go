@@ -28,7 +28,7 @@ func (this *ForgetController) Post() {
 <body>
     <h3>Reset Password:</h3>
     <p>Someone has request password reset, click the link or ignore.</p>
-    <a href="http://localhost:8080/reset?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
+    <a href="http://GapSeeker.tk/reset?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
 </body>
 </html>
 `

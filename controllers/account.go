@@ -278,8 +278,8 @@ func RequestConfirm(uname, to, hash string) {
 <html>
 <body>
     <h3>Email confirmation:</h3>
-    <p>Someone has register an account on localhost, confirm it or ignore.</p>
-    <a href="http://localhost:8080/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
+    <p>Someone has register an account on GapSeeker, confirm it or ignore.</p>
+    <a href="http://GapSeeker.tk/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
 </body>
 </html>
 `
