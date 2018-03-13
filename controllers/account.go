@@ -190,13 +190,16 @@ func (this *AccountController) ExpandOM() {
 		return
 	}
 
+	level := this.Input().Get("level")
+
 	uid, _ := strconv.ParseInt(this.Ctx.Input.Params()["0"], 10, 64)
 	if uid != user.Id {
 		user = models.GetUserById(uid)
 	}
 	// Reset user bandwidth usage
-	models.ExpandUserExpire(user.Name, 1)
-	this.Ctx.SetCookie("flash", user.Name+" Expire Flashed", 1024, "/")
+	models.ExpandUserExpire(user.Name, 12)
+	models.SetUserLevel(user.Name, level)
+	this.Ctx.SetCookie("flash", user.Name+" is set to "+level, 1024, "/")
 	this.Redirect("/account", 301)
 }
 

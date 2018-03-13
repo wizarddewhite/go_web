@@ -184,6 +184,22 @@ func ExpandUserExpire(name string, m int) error {
 	return nil
 }
 
+func SetUserLevel(name, level string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	user.Level = level
+	o.Update(user)
+	return nil
+}
+
 func ModifyUserStat(name, inbound, outbound string) (error, bool) {
 	o := orm.NewOrm()
 
