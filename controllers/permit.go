@@ -24,16 +24,16 @@ func (this *PermitController) Get() {
 	if u != nil && u.UUID == uuid {
 		switch level := u.Level; level {
 		case "beginner":
-			perm = Perm{3, 3}
+			perm = Perm{3, 5}
 		case "standard":
 			perm = Perm{5, 10}
 		case "advanced":
 			perm = Perm{-1, -1}
 		default:
-			perm = Perm{0, 0}
+			perm = Perm{2, 1}
 		}
 	} else {
-		perm = Perm{0, 0}
+		perm = Perm{2, 1}
 	}
 
 	this.Data["json"] = perm
