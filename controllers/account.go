@@ -275,7 +275,7 @@ func send(to, subject, body, mailtype string) error {
 		content_type = "Content-Type: text/plain" + "; charset=UTF-8"
 	}
 
-	msg := "From: Webframe <no-reply@mail.com> \n" +
+	msg := "From: GapSeeker <no-reply@mail.com> \n" +
 		"To: " + to + "\n" +
 		content_type + "\n" +
 		"Subject: " + subject + "\n\n" +
