@@ -42,7 +42,7 @@ func (this *ForgetController) Post() {
 	var body bytes.Buffer
 	t, _ := template.New("cm").Parse(Templ)
 	t.Execute(&body, &ConfimrMail{uname, hash})
-	send(email, "Webframe: Reset Password", body.String(), "html")
+	send(email, "GapSeeker: Reset Password", body.String(), "html")
 	this.Ctx.SetCookie("flash", "Password reset link has sent to your mail", 1024, "/")
 	this.Redirect("/", 301)
 	return

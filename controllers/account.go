@@ -305,7 +305,7 @@ func RequestConfirm(uname, to, hash string) {
 	var body bytes.Buffer
 	t, _ := template.New("cm").Parse(Templ)
 	t.Execute(&body, &ConfimrMail{uname, hash})
-	err := send(to, "Webframe: Account Confirmation", body.String(), "html")
+	err := send(to, "GapSeeker: Account Confirmation", body.String(), "html")
 	if err != nil {
 		beego.Error(err)
 	}
