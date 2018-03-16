@@ -91,6 +91,7 @@ func (this *AccountController) ConfirmEmail() {
 func (this *AccountController) Post() {
 	uname := this.Input().Get("uname")
 	email := strings.ToLower(this.Input().Get("email"))
+	recommend := this.Input().Get("recommend")
 	pwd := this.Input().Get("pwd")
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	uid := this.Input().Get("uid")
@@ -114,7 +115,7 @@ func (this *AccountController) Post() {
 			return
 		}
 
-		err, vh, _ := models.AddUser(uname, email, string(hash))
+		err, vh, _ := models.AddUser(uname, email, string(hash), recommend)
 		if err != nil {
 			beego.Trace(err)
 			this.Ctx.SetCookie("flash", err.Error(), 1024, "/")
@@ -211,8 +212,19 @@ func (this *AccountController) ExpandOM() {
 		user = models.GetUserById(uid)
 	}
 	// Reset user bandwidth usage
-	models.ExpandUserExpire(user.Name, 1)
-	this.Ctx.SetCookie("flash", user.Name+" Expire Flashed", 1024, "/")
+	models.ExpandUserExpire(user.Name, 12)
+
+	// Expand recommender's time
+	beego.Trace(user.Recommend)
+	if len(user.Recommend) != 0 {
+		rec := models.GetUser(user.Recommend)
+		if rec != nil {
+			// Set recommend level to beginner if it is none
+			models.ExpandUserExpire(user.Recommend, 1)
+		}
+	}
+
+	this.Ctx.SetCookie("flash", user.Name+"expanded", 1024, "/")
 	this.Redirect("/account", 301)
 }
 

@@ -27,6 +27,9 @@ type User struct {
 	PWD     string
 	UUID    string
 
+	Recommend  string
+	Recommends int
+
 	// expire
 	Expire     time.Time
 	NextRefill time.Time
@@ -44,7 +47,7 @@ func DeleteUser(id string) error {
 	return err
 }
 
-func AddUser(name, email, pwd string) (error, string, string) {
+func AddUser(name, email, pwd, recommend string) (error, string, string) {
 	o := orm.NewOrm()
 
 	user := &User{
@@ -53,6 +56,8 @@ func AddUser(name, email, pwd string) (error, string, string) {
 		Email:      email,
 		Expire:     mark_t,
 		NextRefill: mark_t,
+		Recommend:  recommend,
+		Recommends: 0,
 	}
 
 	qs := o.QueryTable("user")
