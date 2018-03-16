@@ -18,14 +18,15 @@ var check_t = time.Date(2009, 11, 17, 20, 34, 59, 0, time.UTC)
 var byteGroups = []int{8, 4, 4, 4, 12}
 
 type User struct {
-	Id      int64
-	Name    string `orm:"index"`
-	Email   string
-	VHash   string
-	Reset   string
-	IsAdmin bool
-	PWD     string
-	UUID    string
+	Id        int64
+	Name      string `orm:"index"`
+	Email     string
+	Recommend string
+	VHash     string
+	Reset     string
+	IsAdmin   bool
+	PWD       string
+	UUID      string
 
 	Level string
 
@@ -46,13 +47,14 @@ func DeleteUser(id string) error {
 	return err
 }
 
-func AddUser(name, email, pwd string) (error, string, string) {
+func AddUser(name, email, pwd, recommend string) (error, string, string) {
 	o := orm.NewOrm()
 
 	user := &User{
 		Name:       name,
 		PWD:        pwd,
 		Email:      email,
+		Recommend:  recommend,
 		Level:      "none",
 		Expire:     mark_t,
 		NextRefill: mark_t,
