@@ -218,7 +218,6 @@ func (this *AccountController) ExpandOM() {
 	models.SetUserLevel(user.Name, level)
 
 	// Expand recommender's time
-	beego.Trace(user.Recommend)
 	if len(user.Recommend) != 0 {
 		rec := models.GetUser(user.Recommend)
 		if rec != nil {

@@ -21,6 +21,8 @@ func user_refill() {
 			models.RefillUser(u)
 		}
 	}
+
+	models.SetExpiredUsers()
 }
 
 func main() {
