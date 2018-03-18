@@ -86,13 +86,14 @@ func AddUser(name, email, pwd, recommend string) (error, string, string) {
 	return nil, user.VHash, user.UUID
 }
 
-func GetAllUsers() ([]*User, error) {
+func GetAllUsers(limit int, offset int64) ([]*User, int64, error) {
 	o := orm.NewOrm()
 
 	users := make([]*User, 0)
 	qs := o.QueryTable("user")
-	_, err := qs.All(&users)
-	return users, err
+	_, err := qs.Limit(limit, offset).All(&users)
+	count, _ := qs.Count()
+	return users, count, err
 }
 
 func GetUser(name string) *User {
