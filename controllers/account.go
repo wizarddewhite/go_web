@@ -11,6 +11,7 @@ import (
 	"go_web/models"
 
 	"github.com/astaxie/beego"
+	"github.com/astaxie/beego/utils/pagination"
 	"golang.org/x/crypto/bcrypt"
 	//"github.com/astaxie/beego/context"
 )
@@ -44,8 +45,23 @@ func (this *AccountController) Get() {
 	}
 
 	if this.Data["IsAdmin"].(bool) {
+		var total_users int64
+		curr_page := 1
+		p := this.Input().Get("p")
+		p_num, err := strconv.ParseInt(p, 10, 64)
+		if err == nil {
+			curr_page = int(p_num)
+		}
+		usersPerPage := 13
+
 		// admin could view all users' informatioin
-		this.Data["Users"], _ = models.GetAllUsers()
+		this.Data["Users"], total_users, _ = models.GetAllUsers(usersPerPage,
+			int64(usersPerPage*(curr_page-1)))
+
+		// sets this.Data["paginator"]
+		paginator := pagination.SetPaginator(this.Ctx, usersPerPage,
+			total_users)
+		this.Data["paginator"] = paginator
 		this.TplName = "account.html"
 	} else {
 		// normal user only view his informatioin
