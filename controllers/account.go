@@ -294,8 +294,8 @@ func RequestConfirm(uname, to, hash string) {
 <html>
 <body>
     <h3>Email confirmation:</h3>
-    <p>Someone has register an account on localhost, confirm it or ignore.</p>
-    <a href="http://localhost:8080/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
+    <p>Someone has register an account on ShebaoGongjijin.tk, confirm it or ignore.</p>
+    <a href="http://shebaogongjijin.tk/account/confirmemail?uname={{.Name}}&hash={{.Hash}}">Click to Confirm</a>
 </body>
 </html>
 `
@@ -303,7 +303,7 @@ func RequestConfirm(uname, to, hash string) {
 	var body bytes.Buffer
 	t, _ := template.New("cm").Parse(Templ)
 	t.Execute(&body, &ConfimrMail{uname, hash})
-	err := send(to, "Webframe: Account Confirmation", body.String(), "html")
+	err := send(to, "ShebaoGongjijin: Account Confirmation", body.String(), "html")
 	if err != nil {
 		beego.Error(err)
 	}

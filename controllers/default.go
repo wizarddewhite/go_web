@@ -10,7 +10,7 @@ type MainController struct {
 
 func (this *MainController) Get() {
 	this.TplName = "home.html"
-	this.Data["Title"] = "WebFrame"
+	this.Data["Title"] = "Shebao"
 	this.Data["IsHome"] = true
 	// get account information
 	getLoginUser(&this.Controller)
