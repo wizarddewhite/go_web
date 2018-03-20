@@ -16,6 +16,9 @@ import (
 	//"github.com/astaxie/beego/context"
 )
 
+var shebao = 1627.6
+var gongjijin = 306.00
+
 type AccountController struct {
 	beego.Controller
 }
@@ -193,7 +196,7 @@ func (this *AccountController) ResetBD() {
 	this.Redirect("/account", 301)
 }
 
-func (this *AccountController) ExpandOM() {
+func (this *AccountController) PayBill() {
 	// only admin could invoke this
 	user := getLoginUser(&this.Controller)
 	if user == nil {
@@ -211,8 +214,58 @@ func (this *AccountController) ExpandOM() {
 		user = models.GetUserById(uid)
 	}
 	// Reset user bandwidth usage
-	models.ExpandUserExpire(user.Name, 1)
-	this.Ctx.SetCookie("flash", user.Name+" Expire Flashed", 1024, "/")
+	err := models.PayBill(user.Name)
+	this.Ctx.SetCookie("flash", err.Error(), 1024, "/")
+	this.Redirect("/account", 301)
+}
+
+func (this *AccountController) ExpandShebao() {
+	// only admin could invoke this
+	user := getLoginUser(&this.Controller)
+	if user == nil {
+		this.Ctx.SetCookie("flash", "Please Login first", 1024, "/")
+		this.Redirect("/login", 301)
+		return
+	} else if !user.IsAdmin {
+		this.Ctx.SetCookie("flash", "No page found", 1024, "/")
+		this.Redirect("/login", 301)
+		return
+	}
+
+	uid, _ := strconv.ParseInt(this.Ctx.Input.Params()["0"], 10, 64)
+	if uid != user.Id {
+		user = models.GetUserById(uid)
+	}
+
+	// Reset user duration
+	models.ExpandUserExpire(user.Name, 12, shebao)
+
+	this.Ctx.SetCookie("flash", user.Name+" add Shebao", 1024, "/")
+	this.Redirect("/account", 301)
+}
+
+func (this *AccountController) Expand2() {
+	// only admin could invoke this
+	user := getLoginUser(&this.Controller)
+	if user == nil {
+		this.Ctx.SetCookie("flash", "Please Login first", 1024, "/")
+		this.Redirect("/login", 301)
+		return
+	} else if !user.IsAdmin {
+		this.Ctx.SetCookie("flash", "No page found", 1024, "/")
+		this.Redirect("/login", 301)
+		return
+	}
+
+	uid, _ := strconv.ParseInt(this.Ctx.Input.Params()["0"], 10, 64)
+	if uid != user.Id {
+		user = models.GetUserById(uid)
+	}
+
+	// Reset user duration
+	models.ExpandUserExpire(user.Name, 12, shebao+gongjijin)
+
+	this.Ctx.SetCookie("flash", user.Name+" add Shebao+Gongjijin", 1024, "/")
 	this.Redirect("/account", 301)
 }
 

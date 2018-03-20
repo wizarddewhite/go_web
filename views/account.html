@@ -7,7 +7,8 @@
 		<tr>
 			<th>Name</th>
 			<th>Expire</th>
-			<th>UUID</th>
+			<th>Pay To</th>
+			<th>Bill</th>
 			<th>Action</th>
 		</tr>
 	</thead>
@@ -17,11 +18,13 @@
 			<tr>
 			<th>{{.Name}}</th>
 			<th>{{date .Expire "Y-m-d"}}</th>
-			<th>{{.UUID}}</th>
+			<th>{{date .Last_payed "Y-m"}}</th>
+			<th>{{.Bill}}</th>
 			<th>
 				<a href="/account/edit/{{.Id}}">Modify</a>|
-				<a href="/account/resetbd/{{.Id}}">Reset</a>|
-				<a href="/account/expandom/{{.Id}}">One Month</a>|
+				<a href="/account/paybill/{{.Id}}">PayBill</a>|
+				<a href="/account/expandshebao/{{.Id}}">Shebao</a>|
+				<a href="/account/expand2/{{.Id}}">Both</a>|
 				<a href="/account/delete/{{.Id}}">Delete</a>
 			</th>
 			</tr>
@@ -31,8 +34,9 @@
 			{{with .User}}
 			<tr>
 			<th>{{.Name}}</th>
-			<th>{{date .Expire "Y-m-d"}}</th>
-			<th>{{.UUID}}</th>
+			<th>{{date .Expire "Y-m"}}</th>
+			<th>{{date .Last_payed "Y-m"}}</th>
+			<th>{{.Bill}}</th>
 			<th>
 				<a href="/account/edit/{{.Id}}">Modify</a>
 			</th>

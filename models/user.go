@@ -27,6 +27,11 @@ type User struct {
 	PWD     string
 	UUID    string
 
+	// payment record for the following year
+	First_pay  time.Time
+	Last_payed time.Time
+	Bill       float64
+
 	// expire
 	Expire     time.Time
 	NextRefill time.Time
@@ -53,6 +58,8 @@ func AddUser(name, email, pwd string) (error, string, string) {
 		Email:      email,
 		Expire:     mark_t,
 		NextRefill: mark_t,
+		First_pay:  mark_t,
+		Last_payed: mark_t,
 	}
 
 	qs := o.QueryTable("user")
@@ -156,7 +163,7 @@ func RefillUsers() ([]*User, error) {
 }
 
 // Expand User Expire for m month
-func ExpandUserExpire(name string, m int) error {
+func ExpandUserExpire(name string, m int, amount float64) error {
 	o := orm.NewOrm()
 
 	user := new(User)
@@ -177,9 +184,42 @@ func ExpandUserExpire(name string, m int) error {
 		// not expired yet, start from previous expiration
 		user.Expire = te.AddDate(0, m, 0).UTC()
 	}
+	user.Bill = amount
+	user.First_pay = tn
 
 	o.Update(user)
 	return nil
+}
+
+func PayBill(name string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	if user.Expire == mark_t {
+		return errors.New(name + " expired")
+	}
+
+	next_pay := user.Last_payed.AddDate(0, 1, 0).UTC()
+	if next_pay.After(user.Expire) {
+		return errors.New(name + " has payed all bill this year")
+	}
+
+	if user.Last_payed == mark_t {
+		// first pay
+		user.Last_payed = user.First_pay.AddDate(0, 0, 1).UTC()
+	} else {
+		user.Last_payed = next_pay
+	}
+
+	o.Update(user)
+	return errors.New(name + " bill payed")
 }
 
 func ModifyUserStat(name, inbound, outbound string) (error, bool) {
