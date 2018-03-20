@@ -97,6 +97,8 @@ func (this *AccountController) Post() {
 	pwd := this.Input().Get("pwd")
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	uid := this.Input().Get("uid")
+	rname := this.Input().Get("rname")
+	idn := this.Input().Get("idn")
 	if len(uid) == 0 {
 		// create a new account
 		if err != nil {
@@ -140,6 +142,11 @@ func (this *AccountController) Post() {
 			if err != nil {
 				this.Redirect("/account/edit/"+uid, 301)
 			}
+		}
+
+		// change real name and ID Card
+		if len(rname) != 0 && len(idn) != 0 {
+			models.ModifyUserID(uname, idn, rname)
 		}
 
 		this.Redirect("/account", 301)

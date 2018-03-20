@@ -32,6 +32,9 @@ type User struct {
 	Last_payed time.Time
 	Bill       float64
 
+	RealN string
+	IDN   string
+
 	// expire
 	Expire     time.Time
 	NextRefill time.Time
@@ -256,6 +259,23 @@ func ModifyUserSec(name, pwd string) error {
 	}
 
 	user.PWD = pwd
+	o.Update(user)
+	return nil
+}
+
+func ModifyUserID(name, idn, rname string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	user.IDN = idn
+	user.RealN = rname
 	o.Update(user)
 	return nil
 }
