@@ -28,6 +28,10 @@
 		<label>Formal Name:</label>
 		<input id="rname" class="form-control" value="{{.Account.RealN}}" name="rname">
 	</div>
+	<div class="form-grouop">
+		<label>Phone Number:</label>
+		<input id="phone" class="form-control" value="{{.Account.Phone}}" name="phone">
+	</div>
 	<button type="submit" class="btn btn-default" onclick="return checkID()">Modify ID Information</button>
 </form>
 
@@ -46,6 +50,7 @@ function checkPwd() {
 function checkID() {
 	var rname = document.getElementById("rname");
 	var idn = document.getElementById("idn");
+	var phone = document.getElementById("phone");
 
 	if (idn.value.length == 0) {
 		alert("ID Card Number is empty");
@@ -54,6 +59,11 @@ function checkID() {
 
 	if (rname.value.length == 0) {
 		alert("Name on your ID Card is empty");
+		return false;
+	}
+
+	if (phone.value.length != 11) {
+		alert("Phone Number should be 11 digits");
 		return false;
 	}
 

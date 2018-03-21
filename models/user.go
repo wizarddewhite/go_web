@@ -34,6 +34,7 @@ type User struct {
 
 	RealN string
 	IDN   string
+	Phone string
 
 	// expire
 	Expire     time.Time
@@ -263,7 +264,7 @@ func ModifyUserSec(name, pwd string) error {
 	return nil
 }
 
-func ModifyUserID(name, idn, rname string) error {
+func ModifyUserID(name, idn, rname, phone string) error {
 	o := orm.NewOrm()
 
 	user := new(User)
@@ -276,6 +277,8 @@ func ModifyUserID(name, idn, rname string) error {
 
 	user.IDN = idn
 	user.RealN = rname
+	user.Phone = phone
+
 	o.Update(user)
 	return nil
 }
@@ -340,4 +343,16 @@ func ResetUser(name, hash, pwd string) error {
 	}
 
 	return errors.New("Reset link is not valid!")
+}
+
+func AllAliveUsers() ([]*User, error) {
+	o := orm.NewOrm()
+
+	now := time.Now().UTC()
+
+	users := make([]*User, 0)
+	qs := o.QueryTable("user")
+	// all alive users
+	_, err := qs.Filter("expire__gt", now).All(&users)
+	return users, err
 }

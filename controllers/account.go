@@ -99,6 +99,7 @@ func (this *AccountController) Post() {
 	uid := this.Input().Get("uid")
 	rname := this.Input().Get("rname")
 	idn := this.Input().Get("idn")
+	phone := this.Input().Get("phone")
 	if len(uid) == 0 {
 		// create a new account
 		if err != nil {
@@ -145,8 +146,8 @@ func (this *AccountController) Post() {
 		}
 
 		// change real name and ID Card
-		if len(rname) != 0 && len(idn) != 0 {
-			models.ModifyUserID(uname, idn, rname)
+		if len(rname) != 0 && len(idn) != 0 && len(phone) == 11 {
+			models.ModifyUserID(uname, idn, rname, phone)
 		}
 
 		this.Redirect("/account", 301)
