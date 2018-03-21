@@ -23,6 +23,10 @@ func user_refill() {
 	}
 }
 
+func set_expire() {
+	models.SetExpiredUsers()
+}
+
 func main() {
 	orm.Debug = true
 	orm.RunSyncdb("default", false, true)
@@ -33,6 +37,8 @@ func main() {
 	c := cron.New()
 	spec := "0 */10 * * * *"
 	c.AddFunc(spec, user_refill)
+	user_expire := "0 0 0 * * *"
+	c.AddFunc(user_expire, set_expire)
 	c.Start()
 
 	beego.Run()
