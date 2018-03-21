@@ -64,6 +64,10 @@ func notify_admin() {
 	}
 }
 
+func set_expire() {
+	models.SetExpiredUsers()
+}
+
 func main() {
 	orm.Debug = true
 	orm.RunSyncdb("default", false, true)
@@ -74,8 +78,10 @@ func main() {
 	c := cron.New()
 	to_user := "0 0 0 25 * *"
 	c.AddFunc(to_user, notify_user)
-	to_admin := "0 0 0 25 * *"
+	to_admin := "0 0 0 1 * *"
 	c.AddFunc(to_admin, notify_admin)
+	user_expire := "0 0 0 * * *"
+	c.AddFunc(user_expire, set_expire)
 	c.Start()
 
 	beego.Run()

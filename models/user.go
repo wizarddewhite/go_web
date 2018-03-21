@@ -141,7 +141,7 @@ func SetExpiredUsers() ([]*User, error) {
 	qs := o.QueryTable("user")
 	_, err := qs.Filter("expire__gt", check_t).Filter("expire__lt", now).All(&users)
 	if err == nil {
-		qs.Filter("expire__gt", check_t).Filter("expire__lt", now).Update(orm.Params{"expire": mark_t, "nextrefill": mark_t})
+		qs.Filter("expire__gt", check_t).Filter("expire__lt", now).Update(orm.Params{"expire": mark_t, "nextrefill": mark_t, "last_payed": mark_t})
 	}
 	return users, err
 }
