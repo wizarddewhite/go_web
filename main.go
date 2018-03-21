@@ -14,14 +14,7 @@ func init() {
 	models.RegisterDB()
 }
 
-func user_refill() {
-	ru, err := models.RefillUsers()
-	if err == nil {
-		for _, u := range ru {
-			models.RefillUser(u)
-		}
-	}
-
+func set_expire() {
 	models.SetExpiredUsers()
 }
 
@@ -33,8 +26,8 @@ func main() {
 
 	// User Refill task
 	c := cron.New()
-	spec := "0 */10 * * * *"
-	c.AddFunc(spec, user_refill)
+	spec := "0 0 * * * *"
+	c.AddFunc(spec, set_expire)
 	c.Start()
 
 	beego.Run()
