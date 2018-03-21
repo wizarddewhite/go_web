@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"go_web/models"
+	"shebao/models"
 
 	"github.com/astaxie/beego"
 	"golang.org/x/crypto/bcrypt"

@@ -6,8 +6,8 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/robfig/cron"
 
-	"go_web/models"
-	_ "go_web/routers"
+	"shebao/models"
+	_ "shebao/routers"
 )
 
 func init() {
