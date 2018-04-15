@@ -95,6 +95,8 @@ Restart:
 
 	for _, starId := range pop_star {
 
+		time.Sleep(time.Duration(30) * time.Second)
+
 		// retrieve the latest post
 		params = map[string][]string{
 			"userId":      {pid},
@@ -104,6 +106,7 @@ Restart:
 		}
 
 		artId, ts := models.BH_GetArt(params)
+		beego.Trace("Lastest post from", starId, "is", artId)
 
 		// skip an old post
 		if t1.After(time.Unix(ts/1000, 0)) {
@@ -122,14 +125,10 @@ Restart:
 			}
 			models.BH_Up(params)
 		}
-
-		break
 	}
 
 	// adjust the time mark
 	t1 = t2
-
-	time.Sleep(time.Duration(2) * time.Minute)
 
 	tn := time.Now().UTC()
 	elapsed := tn.Sub(ts)
