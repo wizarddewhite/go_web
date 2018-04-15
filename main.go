@@ -19,8 +19,17 @@ func init() {
 }
 
 var pop_star = []string{
-	"9909", // jinma
-	"1385", // 爱思考的糖
+	"179159", // me
+	"9909",   // jinma
+	"1385",   // 爱思考的糖
+	"131507", // 圊呓语
+	"483",    // 玩火的猴子
+	"2234",   // 南宫远
+	"11880",  // 湘乡的大树
+	"55332",  // 吴庆英
+	"12627",  // jimi
+	"193646", // wdctll
+	"9457",   // Bean
 }
 
 func up_vote() {
@@ -35,7 +44,7 @@ func up_vote() {
 	time.Sleep(time.Duration(10) * time.Second)
 
 	// check last two minute posts
-	t1 = time.Now().UTC().Add(-time.Hour * time.Duration(10))
+	t1 = time.Now().UTC().Add(-time.Minute * time.Duration(2))
 
 RefreshUser:
 	pn := beego.AppConfig.String("pn")
