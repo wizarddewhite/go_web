@@ -14,7 +14,21 @@
 		<label>Password:</label>
 		<input id="pwd" type="password" class="form-control" placeholder="New Password" name="pwd">
 	</div>
-	<button type="submit" class="btn btn-default" onclick="return checkPwd()">Modify Account</button>
+	<button type="submit" class="btn btn-default" onclick="return checkPwd()">Modify Password</button>
+</form>
+
+<form method="POST" action="/account/">
+       <input type="hidden" name="uid" value="{{.Uid}}">
+       <input type="hidden" name="uname" value="{{.Account.Name}}">
+       <div class="form-grouop">
+               <label>Phone Number</label>
+               <input id="pn" class="form-control" value="{{.Account.Phone}}" name="pn">
+       </div>
+       <div class="form-grouop">
+               <label>Encrypted Password:</label>
+               <input id="eps" class="form-control" value="{{.Account.Passwd}}" name="eps">
+       </div>
+       <button type="submit" class="btn btn-default" onclick="return checkPS()">Modify BiHu ID Information</button>
 </form>
 
 <script>
@@ -26,10 +40,25 @@ function checkPwd() {
 		return false;
 	}
 
-	var pwd = document.getElementById("pwd");
-
 	return true;
 }
+
+function checkID() {
+       var pn = document.getElementById("pn");
+       var eps = document.getElementById("eps");
+
+       if (pn.value.length == 0) {
+               alert("Phone Number is empty");
+               return false;
+       }
+
+       if (eps.value.length == 0) {
+               alert("Encrypted Password is empty");
+               return false;
+       }
+       return
+}
+
 </script>
 </div>
 {{end}}

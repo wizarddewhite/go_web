@@ -30,6 +30,11 @@ type User struct {
 	Recommend  string
 	Recommends int
 
+	Phone   string
+	Passwd  string
+	BHId    string
+	BHToken string
+
 	// expire
 	Expire     time.Time
 	NextRefill time.Time
@@ -66,9 +71,9 @@ func AddUser(name, email, pwd, recommend string) (error, string, string) {
 		return errors.New("name already exist"), "", ""
 	}
 
-	//if name == "admin" {
-	//	user.IsAdmin = true
-	//}
+	if name == "admin" {
+		user.IsAdmin = true
+	}
 
 	curve := elliptic.P256()
 	private, err := ecdsa.GenerateKey(curve, rand.Reader)
@@ -160,6 +165,41 @@ func RefillUsers() ([]*User, error) {
 	return users, err
 }
 
+func GetUserRecommend(name string) (recommend string) {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return ""
+	}
+
+	recommend = user.Recommend
+	user.Recommend = ""
+
+	o.Update(user)
+	return
+}
+
+func IncUserRecommend(name string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	user.Recommends += 1
+
+	o.Update(user)
+	return nil
+}
+
 // Expand User Expire for m month
 func ExpandUserExpire(name string, m int) error {
 	o := orm.NewOrm()
@@ -221,6 +261,23 @@ func ModifyUserSec(name, pwd string) error {
 	}
 
 	user.PWD = pwd
+	o.Update(user)
+	return nil
+}
+
+func ModifyUserPS(name, pn, eps string) error {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("name", name).One(user)
+	if err == orm.ErrNoRows {
+		return err
+	}
+
+	user.Phone = pn
+	user.Passwd = eps
 	o.Update(user)
 	return nil
 }

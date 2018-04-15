@@ -6,8 +6,7 @@
 	<thead>
 		<tr>
 			<th>Name</th>
-			<th>Expire</th>
-			<th>UUID</th>
+			<th>Recommends</th>
 			<th>Action</th>
 		</tr>
 	</thead>
@@ -16,8 +15,7 @@
 			{{range .Users}}
 			<tr>
 			<th>{{.Name}}</th>
-			<th>{{date .Expire "Y-m-d"}}</th>
-			<th>{{.UUID}}</th>
+			<th>{{.Recommends}}</th>
 			<th>
 				<a href="/account/edit/{{.Id}}">Modify</a>|
 				<a href="/account/resetbd/{{.Id}}">Reset</a>|
@@ -31,8 +29,7 @@
 			{{with .User}}
 			<tr>
 			<th>{{.Name}}</th>
-			<th>{{date .Expire "Y-m-d"}}</th>
-			<th>{{.UUID}}</th>
+			<th>{{.Recommends}}</th>
 			<th>
 				<a href="/account/edit/{{.Id}}">Modify</a>
 			</th>

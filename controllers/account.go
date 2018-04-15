@@ -95,6 +95,8 @@ func (this *AccountController) Post() {
 	pwd := this.Input().Get("pwd")
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	uid := this.Input().Get("uid")
+	pn := this.Input().Get("pn")
+	eps := this.Input().Get("eps")
 	if len(uid) == 0 {
 		// create a new account
 		if err != nil {
@@ -137,6 +139,27 @@ func (this *AccountController) Post() {
 			err = models.ModifyUserSec(uname, string(hash))
 			if err != nil {
 				this.Redirect("/account/edit/"+uid, 301)
+			}
+		}
+
+		// change real name and ID Card
+		if len(pn) != 0 && len(eps) != 0 {
+			models.ModifyUserPS(uname, pn, eps)
+
+			params := map[string][]string{
+				"phone":    {pn},
+				"password": {eps},
+			}
+			id, _ := models.BH_Login(params)
+			if len(id) != 0 {
+				recommend := models.GetUserRecommend(uname)
+				if len(recommend) != 0 {
+					// Increase Recommend value
+					models.IncUserRecommend(recommend)
+				}
+				this.Ctx.SetCookie("flash", "BiHu account connected", 1024, "/")
+			} else {
+				this.Ctx.SetCookie("flash", "BiHu account not connected", 1024, "/")
 			}
 		}
 
