@@ -30,6 +30,7 @@ var pop_star = []string{
 	"12627",  // jimi
 	"193646", // wdctll
 	"9457",   // Bean
+	"13599",  // 陈竹
 }
 
 func up_vote() {
