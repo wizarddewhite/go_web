@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"text/template"
 
-	"go_web/models"
+	"bihu_helper/models"
 
 	"github.com/astaxie/beego"
 	//"github.com/astaxie/beego/context"

@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"go_web/models"
+	"bihu_helper/models"
 
 	"github.com/astaxie/beego"
 	"golang.org/x/crypto/bcrypt"

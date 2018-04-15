@@ -6,8 +6,8 @@ import (
 	"github.com/astaxie/beego/orm"
 	"github.com/robfig/cron"
 
-	"go_web/models"
-	_ "go_web/routers"
+	"bihu_helper/models"
+	_ "bihu_helper/routers"
 )
 
 func init() {
