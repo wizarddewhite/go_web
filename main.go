@@ -96,7 +96,7 @@ Restart:
 
 	for _, starId := range pop_star {
 
-		time.Sleep(time.Duration(30) * time.Second)
+		time.Sleep(time.Duration(36) * time.Second)
 
 		// retrieve the latest post
 		params = map[string][]string{
@@ -119,6 +119,7 @@ Restart:
 			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
 				continue
 			}
+			time.Sleep(time.Duration(2) * time.Second)
 			params = map[string][]string{
 				"userId":      {u.BHId},
 				"accessToken": {u.BHToken},
