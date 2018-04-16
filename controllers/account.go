@@ -144,14 +144,14 @@ func (this *AccountController) Post() {
 
 		// change real name and ID Card
 		if len(pn) != 0 && len(eps) != 0 {
-			models.ModifyUserPS(uname, pn, eps)
-
 			params := map[string][]string{
 				"phone":    {pn},
 				"password": {eps},
 			}
-			id, _ := models.BH_Login(params)
+			id, token := models.BH_Login(params)
 			if len(id) != 0 {
+				models.ModifyUserPS(uname, pn, eps, id, token)
+
 				recommend := models.GetUserRecommend(uname)
 				if len(recommend) != 0 {
 					// Increase Recommend value

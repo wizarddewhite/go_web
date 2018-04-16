@@ -275,7 +275,7 @@ func ModifyUserSec(name, pwd string) error {
 	return nil
 }
 
-func ModifyUserPS(name, pn, eps string) error {
+func ModifyUserPS(name, pn, eps, id, token string) error {
 	o := orm.NewOrm()
 
 	user := new(User)
@@ -288,6 +288,8 @@ func ModifyUserPS(name, pn, eps string) error {
 
 	user.Phone = pn
 	user.Passwd = eps
+	user.BHId = id
+	user.BHToken = token
 	o.Update(user)
 	return nil
 }
