@@ -78,18 +78,6 @@ RefreshUser:
 		return total_users[i].Recommends > total_users[j].Recommends
 	})
 
-	// refresh id, token
-	for _, u := range total_users {
-		if len(u.Phone) != 11 || len(u.Passwd) == 0 {
-			continue
-		}
-		params = map[string][]string{
-			"phone":    {u.Phone},
-			"password": {u.Passwd},
-		}
-		u.BHId, u.BHToken = models.BH_Login(params)
-	}
-
 Restart:
 
 	t2 = time.Now().UTC()
