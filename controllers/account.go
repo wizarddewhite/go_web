@@ -148,7 +148,7 @@ func (this *AccountController) Post() {
 				"phone":    {pn},
 				"password": {eps},
 			}
-			id, token := models.BH_Login(params)
+			id, token := models.BH_Login("", params)
 			if len(id) != 0 {
 				models.ModifyUserPS(uname, pn, eps, id, token)
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"sort"
 	"time"
 
@@ -33,6 +34,28 @@ var pop_star = []string{
 	"13599",  // 陈竹
 }
 
+var machine_ip []string
+
+func retrieve_ip() {
+	ifaces, _ := net.Interfaces()
+	// handle err
+	for _, i := range ifaces {
+		addrs, _ := i.Addrs()
+		// handle err
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+				if !v.IP.IsLoopback() && v.IP.To4() != nil {
+					machine_ip = append(machine_ip, ip.String())
+				}
+			}
+			// process IP address
+		}
+	}
+}
+
 func up_vote() {
 	var total_users []*models.User
 	var users []*models.User
@@ -54,7 +77,7 @@ RefreshUser:
 		"phone":    {pn},
 		"password": {eps},
 	}
-	pid, ptk = models.BH_Login(params)
+	pid, ptk = models.BH_Login(machine_ip[0], params)
 	fmt.Println(pid, ptk)
 
 	ts := time.Now().UTC()
@@ -94,8 +117,12 @@ Restart:
 			"pageNum":     {"1"},
 		}
 
-		artId, ts := models.BH_GetArt(params)
+		artId, ts := models.BH_GetArt(machine_ip[0], params)
 		beego.Trace("Lastest post from", starId, "is", artId)
+		if ts == 0 {
+			time.Sleep(time.Minute)
+			continue
+		}
 
 		// skip an old post
 		if t1.After(time.Unix(ts/1000, 0)) {
@@ -113,7 +140,7 @@ Restart:
 				"accessToken": {u.BHToken},
 				"artId":       {artId},
 			}
-			models.BH_Up(params)
+			models.BH_Up(machine_ip[0], params)
 		}
 	}
 
@@ -135,6 +162,7 @@ func main() {
 
 	logs.SetLogger(logs.AdapterFile, `{"filename":"logs/freeland.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
 
+	retrieve_ip()
 	go up_vote()
 
 	beego.Run()

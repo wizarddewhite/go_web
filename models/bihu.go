@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -12,8 +13,13 @@ import (
 	. "github.com/bitly/go-simplejson"
 )
 
-func bihu(api string, params map[string][]string) (int, []byte) {
+func bihu(addr, api string, params map[string][]string) (int, []byte) {
+	localaddr, _ := net.ResolveTCPAddr("tcp", addr+":0")
 	tr := &http.Transport{
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			LocalAddr: localaddr}).Dial,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
@@ -40,8 +46,8 @@ func bihu(api string, params map[string][]string) (int, []byte) {
 	return resp.StatusCode, resBody
 }
 
-func BH_GetArt(params map[string][]string) (artId string, ts int64) {
-	status, body := bihu("/api/content/show/getUserArtList", params)
+func BH_GetArt(addr string, params map[string][]string) (artId string, ts int64) {
+	status, body := bihu(addr, "/api/content/show/getUserArtList", params)
 	if status != http.StatusOK {
 		return "", 0
 	}
@@ -60,8 +66,8 @@ func BH_GetArt(params map[string][]string) (artId string, ts int64) {
 	return
 }
 
-func BH_Login(params map[string][]string) (id, token string) {
-	status, body := bihu("/api/user/loginViaPassword", params)
+func BH_Login(addr string, params map[string][]string) (id, token string) {
+	status, body := bihu(addr, "/api/user/loginViaPassword", params)
 	if status != http.StatusOK {
 		return "", ""
 	}
@@ -74,7 +80,7 @@ func BH_Login(params map[string][]string) (id, token string) {
 	return
 }
 
-func BH_Up(params map[string][]string) (status int) {
-	status, _ = bihu("/api/content/upVote", params)
+func BH_Up(addr string, params map[string][]string) (status int) {
+	status, _ = bihu(addr, "/api/content/upVote", params)
 	return
 }
