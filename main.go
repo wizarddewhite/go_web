@@ -78,7 +78,7 @@ RefreshUser:
 		"phone":    {pn},
 		"password": {eps},
 	}
-	pid, ptk = models.BH_Login(machine_ip[0], params)
+	pid, ptk = models.BH_Login(machine_ip[len(machine_ip)-1], params)
 	fmt.Println(pid, ptk)
 
 	ts := time.Now().UTC()
@@ -118,7 +118,7 @@ Restart:
 			"pageNum":     {"1"},
 		}
 
-		artId, ts := models.BH_GetArt(machine_ip[0], params)
+		artId, ts := models.BH_GetArt(machine_ip[len(machine_ip)-1], params)
 		beego.Trace("Lastest post from", starId, "is", artId)
 		if ts == 0 {
 			time.Sleep(time.Minute)
