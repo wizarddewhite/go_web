@@ -107,28 +107,21 @@ Restart:
 
 	t2 = time.Now().UTC()
 
-	for _, starId := range pop_star {
+	params = map[string][]string{
+		"userId":      {pid},
+		"accessToken": {ptk},
+	}
+	follows := models.BH_Followlist("", params)
 
-		time.Sleep(time.Minute)
+	for _, p := range follows {
 
-		// retrieve the latest post
-		params = map[string][]string{
-			"userId":      {pid},
-			"accessToken": {ptk},
-			"queryUserId": {starId},
-			"pageNum":     {"1"},
-		}
+		//time.Sleep(time.Minute)
 
-		artId, ts := models.BH_GetArt(machine_ip[len(machine_ip)-1], params)
-		beego.Trace("Lastest post from", starId, "is", artId)
-		if ts == 0 {
-			time.Sleep(time.Minute)
-			continue
-		}
+		beego.Trace("Lastest post from", p.UserName, "is", p.ArtId)
 
 		// skip an old post
-		if t1.After(time.Unix(ts/1000, 0)) {
-			continue
+		if t1.After(time.Unix(p.CT/1000, 0)) {
+			break
 		}
 
 		// upvote this post
@@ -141,7 +134,7 @@ Restart:
 			params = map[string][]string{
 				"userId":      {u.BHId},
 				"accessToken": {u.BHToken},
-				"artId":       {artId},
+				"artId":       {p.ArtId},
 			}
 			models.BH_Up(machine_ip[ip_idx], params)
 			ip_idx--
@@ -159,6 +152,8 @@ Restart:
 	if elapsed > time.Hour {
 		goto RefreshUser
 	}
+
+	time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
 
 	goto Restart
 }

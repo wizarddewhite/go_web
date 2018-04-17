@@ -84,3 +84,30 @@ func BH_Up(addr string, params map[string][]string) (status int) {
 	status, _ = bihu(addr, "/api/content/upVote", params)
 	return
 }
+
+type BH_Post struct {
+	ArtId    string
+	Title    string
+	UserName string
+	CT       int64
+	Ups      int64
+}
+
+func BH_Followlist(addr string, params map[string][]string) (posts []BH_Post) {
+	_, body := bihu(addr, "/api/content/show/getFollowArtList", params)
+	js, err := NewJson(body)
+	if err != nil {
+		return
+	}
+	ps, err := js.Get("data").Get("artList").Get("list").Array()
+	for _, p := range ps {
+		pc := p.(map[string]interface{})
+		id, _ := pc["id"].(json.Number).Int64()
+		title, _ := pc["title"].(string)
+		un, _ := pc["userName"].(string)
+		ts, _ := pc["createTime"].(json.Number).Int64()
+		ups, _ := pc["ups"].(json.Number).Int64()
+		posts = append(posts, BH_Post{strconv.FormatInt(id, 10), title, un, ts, ups})
+	}
+	return
+}
