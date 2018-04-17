@@ -32,6 +32,7 @@ var pop_star = []string{
 	"193646", // wdctll
 	"9457",   // Bean
 	"13599",  // 陈竹
+	"41279",  // 串串
 }
 
 var machine_ip []string
