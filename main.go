@@ -64,6 +64,7 @@ func up_vote() {
 	var t1, t2 time.Time
 	var params map[string][]string
 	var pid, ptk string
+	var ip_idx int
 
 	time.Sleep(time.Duration(10) * time.Second)
 
@@ -130,17 +131,22 @@ Restart:
 		}
 
 		// upvote this post
+		ip_idx = len(machine_ip) - 1
 		for _, u := range total_users {
 			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
 				continue
 			}
-			time.Sleep(time.Duration(36) * time.Second)
+			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
 			params = map[string][]string{
 				"userId":      {u.BHId},
 				"accessToken": {u.BHToken},
 				"artId":       {artId},
 			}
-			models.BH_Up(machine_ip[0], params)
+			models.BH_Up(machine_ip[ip_idx], params)
+			ip_idx--
+			if ip_idx <= -1 {
+				ip_idx = len(machine_ip) - 1
+			}
 		}
 	}
 
