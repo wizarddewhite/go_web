@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 
 	. "github.com/bitly/go-simplejson"
 )
@@ -25,7 +26,10 @@ func bihu(api string, params map[string][]string) (int, []byte) {
 	q = params
 	req.URL.RawQuery = q.Encode()
 
-	client := &http.Client{Transport: tr}
+	client := &http.Client{
+		Timeout:   15 * time.Second,
+		Transport: tr,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return 0, nil
