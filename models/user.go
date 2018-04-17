@@ -207,7 +207,7 @@ func GetUserRecommend(name string) (recommend string) {
 	return
 }
 
-func IncUserRecommend(name string) error {
+func IncUserRecommend(name string, cnt int) error {
 	o := orm.NewOrm()
 
 	user := new(User)
@@ -218,7 +218,7 @@ func IncUserRecommend(name string) error {
 		return err
 	}
 
-	user.Recommends += 1
+	user.Recommends += cnt
 
 	o.Update(user)
 	return nil

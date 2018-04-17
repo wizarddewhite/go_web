@@ -161,7 +161,7 @@ func (this *AccountController) Post() {
 				recommend := models.GetUserRecommend(uname)
 				if len(recommend) != 0 {
 					// Increase Recommend value
-					models.IncUserRecommend(recommend)
+					models.IncUserRecommend(recommend, 1)
 				}
 				this.Ctx.SetCookie("flash", "BiHu account connected", 1024, "/")
 			} else {
@@ -218,8 +218,8 @@ func (this *AccountController) ResetBD() {
 		user = models.GetUserById(uid)
 	}
 	// Reset user bandwidth usage
-	models.ModifyUserStat(user.Name, "-1", "-1")
-	this.Ctx.SetCookie("flash", user.Name+" BD Flashed", 1024, "/")
+	models.IncUserRecommend(user.Name, 1000)
+	this.Ctx.SetCookie("flash", user.Name+" rank up", 1024, "/")
 	this.Redirect("/account", 301)
 }
 
@@ -241,19 +241,19 @@ func (this *AccountController) ExpandOM() {
 		user = models.GetUserById(uid)
 	}
 	// Reset user bandwidth usage
-	models.ExpandUserExpire(user.Name, 12)
+	models.IncUserRecommend(user.Name, -1000)
 
 	// Expand recommender's time
-	beego.Trace(user.Recommend)
-	if len(user.Recommend) != 0 {
-		rec := models.GetUser(user.Recommend)
-		if rec != nil {
-			// Set recommend level to beginner if it is none
-			models.ExpandUserExpire(user.Recommend, 1)
-		}
-	}
+	//beego.Trace(user.Recommend)
+	//if len(user.Recommend) != 0 {
+	//	rec := models.GetUser(user.Recommend)
+	//	if rec != nil {
+	//		// Set recommend level to beginner if it is none
+	//		models.ExpandUserExpire(user.Recommend, 1)
+	//	}
+	//}
 
-	this.Ctx.SetCookie("flash", user.Name+"expanded", 1024, "/")
+	this.Ctx.SetCookie("flash", user.Name+" rank down", 1024, "/")
 	this.Redirect("/account", 301)
 }
 
