@@ -139,6 +139,20 @@ func GetUserById(id int64) *User {
 	}
 }
 
+func GetUserByPN(pn string) *User {
+	o := orm.NewOrm()
+
+	user := new(User)
+
+	qs := o.QueryTable("user")
+	err := qs.Filter("phone", pn).One(user)
+	if err == orm.ErrNoRows {
+		return nil
+	} else {
+		return user
+	}
+}
+
 // Users whose Expire is greater than check_t and less than now are expired.
 // Set their Expire to mark_t and return them.
 func SetExpiredUsers() ([]*User, error) {

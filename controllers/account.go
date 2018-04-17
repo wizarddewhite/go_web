@@ -144,6 +144,12 @@ func (this *AccountController) Post() {
 
 		// change real name and ID Card
 		if len(pn) != 0 && len(eps) != 0 {
+			ou := models.GetUserByPN(pn)
+			if ou != nil && ou.Name != uname {
+				this.Ctx.SetCookie("flash", "This phone number is already used", 1024, "/")
+				this.Redirect("/account", 301)
+				return
+			}
 			params := map[string][]string{
 				"phone":    {pn},
 				"password": {eps},
