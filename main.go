@@ -84,7 +84,7 @@ Restart:
 
 	for _, starId := range pop_star {
 
-		time.Sleep(time.Duration(36) * time.Second)
+		time.Sleep(time.Minute)
 
 		// retrieve the latest post
 		params = map[string][]string{
