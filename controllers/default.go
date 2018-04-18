@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+
+	"bihu_helper/models"
 )
 
 type MainController struct {
@@ -19,5 +21,6 @@ func (this *MainController) Get() {
 		this.Data["Flash"] = ck.Value
 		this.Ctx.SetCookie("flash", "", -1, "/")
 	}
+	this.Data["Posts"], _, _ = models.GetAllPosts(10, 0)
 	beego.Trace("home/get")
 }

@@ -156,6 +156,8 @@ Restart:
 				ip_idx = len(machine_ip) - 1
 			}
 		}
+
+		models.AddPost(p.UserName, p.ArtId, p.Title, p.Ups+1)
 	}
 
 	// adjust the time mark

@@ -10,16 +10,20 @@ import (
 type Post struct {
 	Id int64
 
+	UserN string
 	ArtId string
 	Title string
+	Ups   int64
 }
 
-func AddPost(artId, title string) error {
+func AddPost(usern, artId, title string, ups int64) error {
 	o := orm.NewOrm()
 
 	post := &Post{
+		UserN: usern,
 		ArtId: artId,
 		Title: title,
+		Ups:   ups,
 	}
 
 	qs := o.QueryTable("post")
