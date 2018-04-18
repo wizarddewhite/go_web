@@ -86,6 +86,7 @@ RefreshUser:
 	offset = 0
 
 	// retrieve all users
+	total_users = nil
 	for count == 1000 {
 		users, count, err = models.GetAllUsers(1000, offset)
 		offset += count
