@@ -41,7 +41,7 @@ func GetAllPosts(limit int64, offset int64) ([]*Post, int64, error) {
 
 	posts := make([]*Post, 0)
 	qs := o.QueryTable("post")
-	_, err := qs.Limit(limit, offset).All(&posts)
+	_, err := qs.Limit(limit, offset).OrderBy("-id").All(&posts)
 	count, _ := qs.Count()
 	return posts, count, err
 }
