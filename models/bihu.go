@@ -111,3 +111,8 @@ func BH_Followlist(addr string, params map[string][]string) (posts []BH_Post) {
 	}
 	return
 }
+
+func BH_CM(addr string, params map[string][]string) {
+	bihu(addr, "/api/content/createComment", params)
+	return
+}

@@ -140,6 +140,16 @@ Restart:
 				"artId":       {p.ArtId},
 			}
 			models.BH_Up(machine_ip[ip_idx], params)
+
+			if u.BHId == "179159" {
+				params = map[string][]string{
+					"userId":      {u.BHId},
+					"accessToken": {u.BHToken},
+					"artId":       {p.ArtId},
+					"content":     {"写得很认真"},
+				}
+				models.BH_CM(machine_ip[ip_idx], params)
+			}
 			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
 			ip_idx--
 			if ip_idx <= -1 {
@@ -157,7 +167,7 @@ Restart:
 		goto RefreshUser
 	}
 
-	time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
+	time.Sleep(time.Duration(60/len(machine_ip)) * time.Second)
 
 	goto Restart
 }
