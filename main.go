@@ -67,6 +67,7 @@ func up_vote() {
 	var pid, ptk string
 	var ip_idx int
 
+	ip_idx = len(machine_ip) - 1
 	time.Sleep(time.Duration(10) * time.Second)
 
 	// check last two minute posts
@@ -111,7 +112,11 @@ Restart:
 		"userId":      {pid},
 		"accessToken": {ptk},
 	}
-	follows := models.BH_Followlist("", params)
+	follows := models.BH_Followlist(machine_ip[ip_idx], params)
+	ip_idx--
+	if ip_idx <= -1 {
+		ip_idx = len(machine_ip) - 1
+	}
 
 	for _, p := range follows {
 
@@ -125,18 +130,17 @@ Restart:
 		}
 
 		// upvote this post
-		ip_idx = len(machine_ip) - 1
 		for _, u := range total_users {
 			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
 				continue
 			}
-			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
 			params = map[string][]string{
 				"userId":      {u.BHId},
 				"accessToken": {u.BHToken},
 				"artId":       {p.ArtId},
 			}
 			models.BH_Up(machine_ip[ip_idx], params)
+			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
 			ip_idx--
 			if ip_idx <= -1 {
 				ip_idx = len(machine_ip) - 1
