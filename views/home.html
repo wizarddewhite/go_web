@@ -3,27 +3,7 @@
 {{define "body"}}
 <div class="container">
 	<h1 style="text-align:center;margin-bottom: 60px;margin-top: 40px">
-		让key不再闲置，躺着也能点赞
+		能量不闲置，躺着也点赞
 	</h1>
-
-	<h2>系统最近点赞的文章</h2>
-<table class="table table-striped">
-	<thead>
-		<tr>
-			<th>大V</th>
-			<th>文章</th>
-			<th>本系统抢到的首赞</th>
-		</tr>
-	</thead>
-	<tbody>
-		{{range .Posts}}
-		<tr>
-		<th>{{.UserN}}</th>
-		<th><a href="https://bihu.com/article/{{.ArtId}}">{{.Title}}</a></th>
-		<th>{{.Ups}}</th>
-		</tr>
-		{{end}}
-	</tbody>
-</table>
 <div>
 {{end}}

@@ -16,4 +16,5 @@ func init() {
 	beego.AutoRouter(&controllers.AccountController{})
 
 	beego.Router("/tutorial", &controllers.TutorialController{})
+	beego.Router("/status", &controllers.StatusController{})
 }

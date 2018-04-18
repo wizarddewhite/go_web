@@ -1,0 +1,24 @@
+{{template "common/application.html" .}}
+
+{{define "body"}}
+<div class="container">
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>Star</th>
+			<th>Title</th>
+			<th>First UP</th>
+		</tr>
+	</thead>
+	<tbody>
+		{{range .Posts}}
+		<tr>
+		<th>{{.UserN}}</th>
+		<th><a href="https://bihu.com/article/{{.ArtId}}">{{.Title}}</a></th>
+		<th>{{.Ups}}</th>
+		</tr>
+		{{end}}
+	</tbody>
+</table>
+<div>
+{{end}}

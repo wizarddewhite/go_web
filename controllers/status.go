@@ -2,16 +2,17 @@ package controllers
 
 import (
 	"github.com/astaxie/beego"
+
+	"bihu_helper/models"
 )
 
-type MainController struct {
+type StatusController struct {
 	beego.Controller
 }
 
-func (this *MainController) Get() {
-	this.TplName = "home.html"
+func (this *StatusController) Get() {
+	this.TplName = "status.html"
 	this.Data["Title"] = "WebFrame"
-	this.Data["IsHome"] = true
 	// get account information
 	getLoginUser(&this.Controller)
 	ck, err := this.Ctx.Request.Cookie("flash")
@@ -19,5 +20,5 @@ func (this *MainController) Get() {
 		this.Data["Flash"] = ck.Value
 		this.Ctx.SetCookie("flash", "", -1, "/")
 	}
-	beego.Trace("home/get")
+	this.Data["Posts"], _, _ = models.GetAllPosts(10, 0)
 }
