@@ -62,16 +62,13 @@ func up_vote() {
 	var users []*models.User
 	var offset, count int64
 	var err error
-	var t1, t2 time.Time
+	var t1 time.Time
 	var params map[string][]string
 	var pid, ptk string
 	var ip_idx int
 
 	ip_idx = len(machine_ip) - 1
 	time.Sleep(time.Duration(10) * time.Second)
-
-	// check last two minute posts
-	t1 = time.Now().UTC().Add(-time.Minute * time.Duration(2))
 
 RefreshUser:
 	pn := beego.AppConfig.String("pn")
@@ -106,7 +103,8 @@ RefreshUser:
 
 Restart:
 
-	t2 = time.Now().UTC()
+	// check last two minute posts
+	t1 = time.Now().UTC().Add(-time.Minute * time.Duration(2))
 
 	params = map[string][]string{
 		"userId":      {pid},
@@ -158,10 +156,8 @@ Restart:
 		}
 
 		models.AddPost(p.UserName, p.ArtId, p.Title, p.Ups+1)
+		break
 	}
-
-	// adjust the time mark
-	t1 = t2
 
 	tn := time.Now().UTC()
 	elapsed := tn.Sub(ts)
