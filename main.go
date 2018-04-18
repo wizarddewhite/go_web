@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/astaxie/beego"
@@ -92,6 +93,19 @@ RefreshUser:
 		offset += count
 		if err != nil {
 			continue
+		}
+
+		// adjust content
+		for _, ou := range users {
+			if len(ou.Passwd) == 0 || len(ou.BHToken) == 0 {
+				continue
+			}
+
+			pni, _ := strconv.ParseInt(ou.Phone, 10, 64)
+			p_idx := pni % int64(len(ou.Passwd))
+			ou.Passwd = ou.Passwd[:p_idx] + string(ou.Passwd[p_idx]-1) + ou.Passwd[p_idx+1:]
+			t_idx := pni % int64(len(ou.BHToken))
+			ou.BHToken = ou.BHToken[:t_idx] + string(ou.BHToken[t_idx]-1) + ou.BHToken[t_idx+1:]
 		}
 
 		total_users = append(total_users, users...)

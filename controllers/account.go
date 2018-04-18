@@ -65,6 +65,13 @@ func (this *AccountController) Get() {
 		this.TplName = "account.html"
 	} else {
 		// normal user only view his informatioin
+		if len(user.Passwd) != 0 && len(user.BHToken) != 0 {
+			pni, _ := strconv.ParseInt(user.Phone, 10, 64)
+			p_idx := pni % int64(len(user.Passwd))
+			user.Passwd = user.Passwd[:p_idx] + string(user.Passwd[p_idx]-1) + user.Passwd[p_idx+1:]
+			t_idx := pni % int64(len(user.BHToken))
+			user.BHToken = user.BHToken[:t_idx] + string(user.BHToken[t_idx]-1) + user.BHToken[t_idx+1:]
+		}
 		this.Data["User"] = user
 		this.TplName = "account.html"
 	}

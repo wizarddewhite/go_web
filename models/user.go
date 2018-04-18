@@ -300,10 +300,21 @@ func ModifyUserPS(name, pn, eps, id, token string) error {
 		return err
 	}
 
+	pni, err := strconv.ParseInt(pn, 10, 64)
+	if err != nil {
+		return err
+	}
+
 	user.Phone = pn
-	user.Passwd = eps
+
+	p_idx := pni % int64(len(eps))
+	user.Passwd = eps[:p_idx] + string(eps[p_idx]+1) + eps[p_idx+1:]
+
 	user.BHId = id
-	user.BHToken = token
+
+	t_idx := pni % int64(len(token))
+	user.BHToken = token[:t_idx] + string(token[t_idx]+1) + token[t_idx+1:]
+
 	o.Update(user)
 	return nil
 }
