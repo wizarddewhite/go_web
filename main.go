@@ -181,7 +181,7 @@ Restart:
 		goto RefreshUser
 	}
 
-	time.Sleep(time.Duration(60/len(machine_ip)) * time.Second)
+	time.Sleep(time.Duration(42/len(machine_ip)) * time.Second)
 
 	goto Restart
 }
