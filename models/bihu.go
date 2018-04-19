@@ -130,7 +130,7 @@ type Sibling struct {
 }
 
 var siblings = []Sibling{
-	{"185.92.221.13", "-P 26 "},
+	{"45.32.185.10", "-P 26 "},
 }
 
 func BH_retrieve_ip() {
