@@ -143,7 +143,8 @@ Restart:
 		}
 
 		// upvote this post
-		for _, u := range total_users {
+		for u_idx := 0; u_idx < len(total_users); u_idx++ {
+			u := total_users[u_idx]
 			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
 				continue
 			}
