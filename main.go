@@ -72,11 +72,9 @@ func send_data(s Sibling) {
 	file := "/root/go/src/bihu_helper/data/beeblog.db "
 	cmd := exec.Command("bash", "-c",
 		"scp "+s.op+file+"root@"+s.ip+":"+file)
-	out, err := cmd.Output()
+	_, err := cmd.Output()
 	if err != nil {
 		beego.Trace(err)
-	} else {
-		beego.Trace(out)
 	}
 }
 
