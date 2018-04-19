@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net"
+	"os/exec"
 	"sort"
 	"strconv"
 	"time"
@@ -38,6 +39,15 @@ var pop_star = []string{
 
 var machine_ip []string
 
+type Sibling struct {
+	ip string
+	op string
+}
+
+var siblings = []Sibling{
+	{"185.92.221.13", "-P 26 "},
+}
+
 func retrieve_ip() {
 	ifaces, _ := net.Interfaces()
 	// handle err
@@ -58,6 +68,18 @@ func retrieve_ip() {
 	}
 }
 
+func send_data(s Sibling) {
+	file := "/root/go/src/bihu_helper/data/beeblog.db "
+	cmd := exec.Command("bash", "-c",
+		"scp "+s.op+file+"root@"+s.ip+":"+file)
+	out, err := cmd.Output()
+	if err != nil {
+		beego.Trace(err)
+	} else {
+		beego.Trace(out)
+	}
+}
+
 func up_vote() {
 	var total_users []*models.User
 	var users []*models.User
@@ -72,6 +94,11 @@ func up_vote() {
 	time.Sleep(time.Duration(10) * time.Second)
 
 RefreshUser:
+	// transfer data to remote
+	for _, s := range siblings {
+		send_data(s)
+	}
+
 	pn := beego.AppConfig.String("pn")
 	eps := beego.AppConfig.String("eps")
 	params = map[string][]string{
@@ -141,6 +168,8 @@ Restart:
 		if t1.After(time.Unix(p.CT/1000, 0)) {
 			break
 		}
+
+		// invoke remote action
 
 		// upvote this post
 		for u_idx := 0; u_idx < len(total_users); u_idx++ {
