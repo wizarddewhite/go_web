@@ -272,7 +272,7 @@ Restart:
 					"userId":      {u.BHId},
 					"accessToken": {u.BHToken},
 					"artId":       {p.ArtId},
-					"content":     {"写得很认真"},
+					"content":     {"看好你，" + p.UserName},
 				}
 				BH_CM(machine_ip[ip_idx], params)
 			}
