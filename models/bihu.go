@@ -85,8 +85,11 @@ func BH_Login(addr string, params map[string][]string) (id, token string) {
 	return
 }
 
-func BH_Up(addr string, params map[string][]string) (status int) {
-	status, _ = bihu(addr, "/api/content/upVote", params)
+func BH_Up(addr string, params map[string][]string) (status int, cnt string) {
+	status, body := bihu(addr, "/api/content/upVote", params)
+	if len(body) > 20 {
+		cnt = string(body[:20])
+	}
 	return
 }
 
