@@ -185,10 +185,9 @@ func BH_up_vote() {
 	var ip_idx int
 
 	ip_idx = len(machine_ip) - 1
-	time.Sleep(time.Duration(10) * time.Second)
 
 RefreshUser:
-	// transfer data to remote
+	time.Sleep(time.Duration(42/len(machine_ip)) * time.Second)
 
 	pn := beego.AppConfig.String("pn")
 	eps := beego.AppConfig.String("eps")
@@ -249,19 +248,9 @@ Restart:
 		ip_idx = len(machine_ip) - 1
 	}
 
-	for _, p := range follows {
+	beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
 
-		//time.Sleep(time.Minute)
-
-		beego.Trace("Lastest post from", p.UserName, "is", p.ArtId)
-
-		// skip an old post
-		if t1.After(time.Unix(p.CT/1000, 0)) {
-			break
-		}
-
-		// invoke remote action
-
+	if time.Unix(follows[0].CT/1000, 0).After(t1) {
 		// upvote this post
 		for u_idx := 0; u_idx < len(total_users); u_idx++ {
 			u := total_users[u_idx]
@@ -271,7 +260,7 @@ Restart:
 			params = map[string][]string{
 				"userId":      {u.BHId},
 				"accessToken": {u.BHToken},
-				"artId":       {p.ArtId},
+				"artId":       {follows[0].ArtId},
 			}
 			BH_Up(machine_ip[ip_idx], "", params)
 
@@ -279,8 +268,8 @@ Restart:
 				params = map[string][]string{
 					"userId":      {u.BHId},
 					"accessToken": {u.BHToken},
-					"artId":       {p.ArtId},
-					"content":     {"看好你，" + p.UserName},
+					"artId":       {follows[0].ArtId},
+					"content":     {"看好你，" + follows[0].UserName},
 				}
 				BH_CM(machine_ip[ip_idx], "", params)
 			}
@@ -291,8 +280,7 @@ Restart:
 			}
 		}
 
-		AddPost(p.UserName, p.ArtId, p.Title, p.Ups+1)
-		break
+		AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
 	}
 
 	tn := time.Now().UTC()
