@@ -18,9 +18,17 @@ import (
 	. "github.com/bitly/go-simplejson"
 )
 
-func bihu(addr, api string, params map[string][]string) (int, []byte) {
+func bihu(addr, proxy, api string, params map[string][]string) (int, []byte) {
+
 	localaddr, _ := net.ResolveTCPAddr("tcp", addr+":0")
+
+	proxyUrl, _ := url.Parse("http://" + proxy)
+	if len(proxy) == 0 {
+		proxyUrl = nil
+	}
+
 	tr := &http.Transport{
+		Proxy: http.ProxyURL(proxyUrl),
 		Dial: (&net.Dialer{
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
@@ -51,8 +59,8 @@ func bihu(addr, api string, params map[string][]string) (int, []byte) {
 	return resp.StatusCode, resBody
 }
 
-func BH_GetArt(addr string, params map[string][]string) (artId string, ts int64) {
-	status, body := bihu(addr, "/api/content/show/getUserArtList", params)
+func BH_GetArt(addr, proxy string, params map[string][]string) (artId string, ts int64) {
+	status, body := bihu(addr, proxy, "/api/content/show/getUserArtList", params)
 	if status != http.StatusOK {
 		return "", 0
 	}
@@ -71,8 +79,8 @@ func BH_GetArt(addr string, params map[string][]string) (artId string, ts int64)
 	return
 }
 
-func BH_Login(addr string, params map[string][]string) (id, token string) {
-	status, body := bihu(addr, "/api/user/loginViaPassword", params)
+func BH_Login(addr, proxy string, params map[string][]string) (id, token string) {
+	status, body := bihu(addr, proxy, "/api/user/loginViaPassword", params)
 	if status != http.StatusOK {
 		return "", ""
 	}
@@ -85,8 +93,8 @@ func BH_Login(addr string, params map[string][]string) (id, token string) {
 	return
 }
 
-func BH_Up(addr string, params map[string][]string) (status int, cnt string) {
-	status, body := bihu(addr, "/api/content/upVote", params)
+func BH_Up(addr, proxy string, params map[string][]string) (status int, cnt string) {
+	status, body := bihu(addr, proxy, "/api/content/upVote", params)
 	if len(body) > 20 {
 		cnt = string(body[:20])
 	}
@@ -101,8 +109,8 @@ type BH_Post struct {
 	Ups      int64
 }
 
-func BH_Followlist(addr string, params map[string][]string) (posts []BH_Post) {
-	_, body := bihu(addr, "/api/content/show/getFollowArtList", params)
+func BH_Followlist(addr, proxy string, params map[string][]string) (posts []BH_Post) {
+	_, body := bihu(addr, proxy, "/api/content/show/getFollowArtList", params)
 	js, err := NewJson(body)
 	if err != nil {
 		return
@@ -120,8 +128,8 @@ func BH_Followlist(addr string, params map[string][]string) (posts []BH_Post) {
 	return
 }
 
-func BH_CM(addr string, params map[string][]string) {
-	bihu(addr, "/api/content/createComment", params)
+func BH_CM(addr, proxy string, params map[string][]string) {
+	bihu(addr, proxy, "/api/content/createComment", params)
 	return
 }
 
@@ -188,7 +196,7 @@ RefreshUser:
 		"phone":    {pn},
 		"password": {eps},
 	}
-	pid, ptk = BH_Login(machine_ip[len(machine_ip)-1], params)
+	pid, ptk = BH_Login(machine_ip[len(machine_ip)-1], "", params)
 	fmt.Println(pid, ptk)
 
 	ts := time.Now().UTC()
@@ -235,7 +243,7 @@ Restart:
 		"userId":      {pid},
 		"accessToken": {ptk},
 	}
-	follows := BH_Followlist(machine_ip[ip_idx], params)
+	follows := BH_Followlist(machine_ip[ip_idx], "", params)
 	ip_idx--
 	if ip_idx <= -1 {
 		ip_idx = len(machine_ip) - 1
@@ -265,7 +273,7 @@ Restart:
 				"accessToken": {u.BHToken},
 				"artId":       {p.ArtId},
 			}
-			BH_Up(machine_ip[ip_idx], params)
+			BH_Up(machine_ip[ip_idx], "", params)
 
 			if u.BHId == "179159" {
 				params = map[string][]string{
@@ -274,7 +282,7 @@ Restart:
 					"artId":       {p.ArtId},
 					"content":     {"看好你，" + p.UserName},
 				}
-				BH_CM(machine_ip[ip_idx], params)
+				BH_CM(machine_ip[ip_idx], "", params)
 			}
 			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
 			ip_idx--
