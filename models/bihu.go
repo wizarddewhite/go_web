@@ -248,9 +248,8 @@ Restart:
 		ip_idx = len(machine_ip) - 1
 	}
 
-	beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
-
-	if time.Unix(follows[0].CT/1000, 0).After(t1) {
+	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(t1) {
+		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
 		// upvote this post
 		for u_idx := 0; u_idx < len(total_users); u_idx++ {
 			u := total_users[u_idx]
