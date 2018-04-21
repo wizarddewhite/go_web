@@ -38,7 +38,7 @@ func bihu(addr, api string, params map[string][]string) (int, []byte) {
 	req.URL.RawQuery = q.Encode()
 
 	client := &http.Client{
-		Timeout:   15 * time.Second,
+		Timeout:   2 * time.Second,
 		Transport: tr,
 	}
 	resp, err := client.Do(req)
