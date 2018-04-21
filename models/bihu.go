@@ -178,9 +178,6 @@ func BH_up_vote() {
 
 RefreshUser:
 	// transfer data to remote
-	for _, s := range siblings {
-		send_data(s)
-	}
 
 	pn := beego.AppConfig.String("pn")
 	eps := beego.AppConfig.String("eps")
