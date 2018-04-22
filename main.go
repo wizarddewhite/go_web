@@ -36,6 +36,7 @@ func main() {
 
 	logs.SetLogger(logs.AdapterFile, `{"filename":"logs/freeland.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
 
+	go models.Update_Proxy()
 	models.BH_retrieve_ip()
 	go models.BH_up_vote()
 

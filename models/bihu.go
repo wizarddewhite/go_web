@@ -11,12 +11,23 @@ import (
 	"os/exec"
 	"sort"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/astaxie/beego"
 
 	. "github.com/bitly/go-simplejson"
 )
+
+type QueryResp struct {
+	Addr string
+	Time float64
+}
+
+var p_mux sync.Mutex
+var proxy_list []string
+var proxys map[string]int
 
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 
@@ -172,6 +183,94 @@ func send_data(s Sibling) {
 	if err != nil {
 		beego.Trace(err)
 	}
+}
+
+func retrieve_proxy_list() (p_l []string) {
+	req := &http.Request{
+		Method: "GET",
+	}
+
+	req.URL, _ = url.Parse("http://127.0.0.1:5010/get_all/")
+	client := &http.Client{Timeout: time.Duration(5 * time.Second)}
+	resp, err := client.Do(req)
+	if err != nil {
+		return
+	}
+	resBody, _ := ioutil.ReadAll(resp.Body)
+	resp.Body.Close()
+	js, err := NewJson(resBody)
+	if err != nil {
+		beego.Trace(err)
+		return
+	}
+	ps, _ := js.Array()
+	for _, p := range ps {
+		pc := p.(interface{})
+		p_l = append(p_l, pc.(string))
+	}
+	return
+}
+
+/* query timeout is 3 second */
+func query_proxy(proxy string, c chan QueryResp) {
+	start_ts := time.Now()
+	url_proxy := &url.URL{Host: proxy}
+	client := &http.Client{
+		Transport: &http.Transport{Proxy: http.ProxyURL(url_proxy)},
+		Timeout:   time.Duration(3 * time.Second)}
+	resp, err := client.Get("https://bihu.com")
+	if err != nil {
+		c <- QueryResp{Addr: proxy, Time: float64(-1)}
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := ioutil.ReadAll(resp.Body)
+	time_diff := time.Now().UnixNano() - start_ts.UnixNano()
+	if strings.Contains(string(body), "好文有好报") {
+		c <- QueryResp{Addr: proxy, Time: float64(time_diff) / 1e9}
+	} else {
+		c <- QueryResp{Addr: proxy, Time: float64(-1)}
+	}
+}
+
+func Update_Proxy() {
+	var vps []string
+	for {
+		p_l := retrieve_proxy_list()
+
+		resp_chan := make(chan QueryResp, 10)
+		for _, proxy := range p_l {
+			go query_proxy(proxy, resp_chan)
+		}
+
+		vps = nil
+
+		for _, _ = range p_l {
+			r := <-resp_chan
+			if r.Time > 1e-9 {
+				vps = append(vps, r.Addr)
+			}
+		}
+
+		p_mux.Lock()
+		proxy_list = vps
+		p_mux.Unlock()
+
+		beego.Trace("Update proxy_list with", len(proxy_list))
+
+		time.Sleep(time.Duration(1) * time.Minute)
+	}
+}
+
+func Get_Proxy() {
+
+	p_mux.Lock()
+	proxys = make(map[string]int, len(proxy_list))
+	for _, p := range proxy_list {
+		proxys[p] = 0
+	}
+	p_mux.Unlock()
+	return
 }
 
 func BH_up_vote() {
