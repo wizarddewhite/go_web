@@ -262,13 +262,9 @@ func Update_Proxy() {
 	}
 }
 
-func Get_Proxy() {
-
+func Get_Proxy() (p_l []string) {
 	p_mux.Lock()
-	proxys = make(map[string]int, len(proxy_list))
-	for _, p := range proxy_list {
-		proxys[p] = 0
-	}
+	p_l = proxy_list
 	p_mux.Unlock()
 	return
 }
