@@ -130,6 +130,7 @@ func BH_Followlist(addr, proxy string, to int, params map[string][]string, p cha
 	_, body := bihu(to, addr, proxy, "/api/content/show/getFollowArtList", params)
 	js, err := NewJson(body)
 	if err != nil {
+		p <- QueryFollow{posts}
 		return
 	}
 	ps, err := js.Get("data").Get("artList").Get("list").Array()
