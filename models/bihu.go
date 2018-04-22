@@ -274,7 +274,7 @@ func BH_up_vote() {
 	var users []*User
 	var offset, count int64
 	var err error
-	var t1 time.Time
+	var post_check time.Time
 	var params map[string][]string
 	var pid, ptk string
 	var ip_idx int
@@ -282,7 +282,6 @@ func BH_up_vote() {
 	ip_idx = len(machine_ip) - 1
 
 RefreshUser:
-	time.Sleep(time.Duration(42/len(machine_ip)) * time.Second)
 
 	pn := beego.AppConfig.String("pn")
 	eps := beego.AppConfig.String("eps")
@@ -293,7 +292,7 @@ RefreshUser:
 	pid, ptk = BH_Login(machine_ip[len(machine_ip)-1], "", 5, params)
 	fmt.Println(pid, ptk)
 
-	ts := time.Now().UTC()
+	refresh_check := time.Now().UTC().Add(time.Hour)
 
 	count = 1000
 	offset = 0
@@ -331,7 +330,7 @@ RefreshUser:
 Restart:
 
 	// check last two minute posts
-	t1 = time.Now().UTC().Add(-time.Minute * time.Duration(2))
+	post_check = time.Now().UTC().Add(-time.Minute * time.Duration(2))
 
 	params = map[string][]string{
 		"userId":      {pid},
@@ -343,7 +342,7 @@ Restart:
 		ip_idx = len(machine_ip) - 1
 	}
 
-	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(t1) {
+	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
 		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
 		// upvote this post
 		for u_idx := 0; u_idx < len(total_users); u_idx++ {
@@ -377,13 +376,11 @@ Restart:
 		AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
 	}
 
-	tn := time.Now().UTC()
-	elapsed := tn.Sub(ts)
-	if elapsed > time.Hour {
+	time.Sleep(time.Duration(42/len(machine_ip)) * time.Second)
+
+	if time.Now().After(refresh_check) {
 		goto RefreshUser
 	}
-
-	time.Sleep(time.Duration(42/len(machine_ip)) * time.Second)
 
 	goto Restart
 }
