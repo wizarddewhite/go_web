@@ -28,6 +28,7 @@ type QueryResp struct {
 var p_mux sync.Mutex
 var proxy_list []string
 var proxys map[string]int
+var should_wait float64
 
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 
@@ -277,11 +278,16 @@ func BH_up_vote() {
 	var post_check, proxy_check time.Time
 	var params map[string][]string
 	var pid, ptk string
+
 	var ip_idx int
 	var p_list []string
+	var http_start time.Time
+	var proxy_idx int
+	var http_slice float64
 
 	// set proxy_check to past to force the first time get
 	proxy_check = time.Now().Add(-time.Minute)
+	should_wait = 0
 
 	ip_idx = len(machine_ip) - 1
 
@@ -339,7 +345,9 @@ Restart:
 		for _, p := range p_list {
 			proxys[p] = 0
 		}
+		http_slice = float64(36) * 1e9 / float64(len(p_list))
 		proxy_check = time.Now().Add(5 * time.Minute)
+		proxy_idx = 0
 	}
 
 	// check last two minute posts
@@ -349,11 +357,13 @@ Restart:
 		"userId":      {pid},
 		"accessToken": {ptk},
 	}
-	follows := BH_Followlist(machine_ip[ip_idx], "", 5, params)
-	ip_idx--
-	if ip_idx <= -1 {
-		ip_idx = len(machine_ip) - 1
+	http_start = time.Now()
+	follows := BH_Followlist("", p_list[proxy_idx], 3, params)
+	proxy_idx++
+	if proxy_idx >= len(p_list) {
+		proxy_idx = 0
 	}
+	should_wait += http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
 
 	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
 		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
@@ -389,7 +399,10 @@ Restart:
 		AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
 	}
 
-	time.Sleep(time.Duration(42/len(machine_ip)) * time.Second)
+	if should_wait > 1e9 {
+		time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+		should_wait -= should_wait / 1e9
+	}
 
 	if time.Now().After(refresh_check) {
 		goto RefreshUser
