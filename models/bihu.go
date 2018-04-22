@@ -25,6 +25,10 @@ type QueryResp struct {
 	Time float64
 }
 
+type QueryFollow struct {
+	posts []BH_Post
+}
+
 var p_mux sync.Mutex
 var proxy_list []string
 var proxys map[string]int
@@ -121,7 +125,8 @@ type BH_Post struct {
 	Ups      int64
 }
 
-func BH_Followlist(addr, proxy string, to int, params map[string][]string) (posts []BH_Post) {
+func BH_Followlist(addr, proxy string, to int, params map[string][]string, p chan QueryFollow) {
+	var posts []BH_Post
 	_, body := bihu(to, addr, proxy, "/api/content/show/getFollowArtList", params)
 	js, err := NewJson(body)
 	if err != nil {
@@ -137,6 +142,8 @@ func BH_Followlist(addr, proxy string, to int, params map[string][]string) (post
 		ups, _ := pc["ups"].(json.Number).Int64()
 		posts = append(posts, BH_Post{strconv.FormatInt(id, 10), title, un, ts, ups})
 	}
+
+	p <- QueryFollow{posts}
 	return
 }
 
@@ -357,8 +364,12 @@ Restart:
 		"userId":      {pid},
 		"accessToken": {ptk},
 	}
+
+	qf := make(chan QueryFollow, 10)
 	http_start = time.Now()
-	follows := BH_Followlist("", p_list[proxy_idx], 3, params)
+	go BH_Followlist("", p_list[proxy_idx], 3, params, qf)
+	QF := <-qf
+	follows := QF.posts
 	proxy_idx++
 	if proxy_idx >= len(p_list) {
 		proxy_idx = 0
