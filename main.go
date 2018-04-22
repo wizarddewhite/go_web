@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -38,6 +40,8 @@ func main() {
 
 	go models.Update_Proxy()
 	models.BH_retrieve_ip()
+
+	time.Sleep(5 * time.Second)
 	go models.BH_up_vote()
 
 	beego.Run()

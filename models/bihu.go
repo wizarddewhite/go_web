@@ -258,7 +258,7 @@ func Update_Proxy() {
 
 		beego.Trace("Update proxy_list with", len(proxy_list))
 
-		time.Sleep(time.Duration(1) * time.Minute)
+		time.Sleep(time.Duration(3) * time.Minute)
 	}
 }
 
@@ -274,10 +274,14 @@ func BH_up_vote() {
 	var users []*User
 	var offset, count int64
 	var err error
-	var post_check time.Time
+	var post_check, proxy_check time.Time
 	var params map[string][]string
 	var pid, ptk string
 	var ip_idx int
+	var p_list []string
+
+	// set proxy_check to past to force the first time get
+	proxy_check = time.Now().Add(-time.Minute)
 
 	ip_idx = len(machine_ip) - 1
 
@@ -328,6 +332,15 @@ RefreshUser:
 	})
 
 Restart:
+	// Get proxy if necessary
+	if time.Now().After(proxy_check) {
+		p_list = Get_Proxy()
+		proxys = make(map[string]int, len(p_list))
+		for _, p := range p_list {
+			proxys[p] = 0
+		}
+		proxy_check = time.Now().Add(5 * time.Minute)
+	}
 
 	// check last two minute posts
 	post_check = time.Now().UTC().Add(-time.Minute * time.Duration(2))
