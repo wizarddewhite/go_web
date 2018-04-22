@@ -148,6 +148,26 @@ func BH_Followlist(addr, proxy string, to int, params map[string][]string, p cha
 	return
 }
 
+func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow) {
+	catched := false
+
+	qf := make(chan QueryFollow, len(proxy))
+	for _, p := range proxy {
+		go BH_Followlist("", p, 4, params, qf)
+	}
+
+	for _, _ = range proxy {
+		QF := <-qf
+		if len(QF.posts) != 0 && !catched {
+			p <- QF
+		}
+	}
+
+	if !catched {
+		p <- QueryFollow{[]BH_Post{}}
+	}
+}
+
 func BH_CM(addr, proxy string, to int, params map[string][]string) {
 	bihu(to, addr, proxy, "/api/content/createComment", params)
 	return
@@ -368,7 +388,7 @@ Restart:
 
 	qf := make(chan QueryFollow, 10)
 	http_start = time.Now()
-	go BH_Followlist("", p_list[proxy_idx], 4, params, qf)
+	go Mult_Follow([]string{p_list[proxy_idx]}, params, qf)
 	QF := <-qf
 	follows := QF.posts
 	proxy_idx++
