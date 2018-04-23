@@ -402,11 +402,11 @@ Restart:
 
 	qf := make(chan QueryFollow, 10)
 	http_start = time.Now()
-	go Mult_Follow(get_n_proxy(1), params, qf)
+	go Mult_Follow(get_n_proxy(2), params, qf)
+	should_wait += 2*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
+
 	QF := <-qf
 	follows := QF.posts
-
-	should_wait += http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
 
 	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
 		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
