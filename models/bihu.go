@@ -34,6 +34,10 @@ var proxy_list []string
 var proxys map[string]int
 var should_wait float64
 
+var p_list []string
+var http_slice float64
+var proxy_idx int
+
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 
 	localaddr, _ := net.ResolveTCPAddr("tcp", addr+":0")
@@ -293,8 +297,15 @@ func Update_Proxy() {
 
 func Get_Proxy() (p_l []string) {
 	p_mux.Lock()
-	p_l = proxy_list
+	p_list = proxy_list
 	p_mux.Unlock()
+
+	proxys = make(map[string]int, len(p_list))
+	for _, p := range p_list {
+		proxys[p] = 0
+	}
+	http_slice = float64(36) * 1e9 / float64(len(p_list))
+	proxy_idx = 0
 	return
 }
 
@@ -308,10 +319,7 @@ func BH_up_vote() {
 	var pid, ptk string
 
 	var ip_idx int
-	var p_list []string
 	var http_start time.Time
-	var proxy_idx int
-	var http_slice float64
 
 	// set proxy_check to past to force the first time get
 	proxy_check = time.Now().Add(-time.Minute)
@@ -368,14 +376,8 @@ RefreshUser:
 Restart:
 	// Get proxy if necessary
 	if time.Now().After(proxy_check) {
-		p_list = Get_Proxy()
-		proxys = make(map[string]int, len(p_list))
-		for _, p := range p_list {
-			proxys[p] = 0
-		}
-		http_slice = float64(36) * 1e9 / float64(len(p_list))
+		Get_Proxy()
 		proxy_check = time.Now().Add(5 * time.Minute)
-		proxy_idx = 0
 	}
 
 	// check last two minute posts
