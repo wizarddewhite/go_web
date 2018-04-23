@@ -220,13 +220,13 @@ func retrieve_proxy_list() (p_l []string) {
 	return
 }
 
-/* query timeout is 3 second */
+/* query timeout is 2 second */
 func query_proxy(proxy string, c chan QueryResp) {
 	start_ts := time.Now()
 	url_proxy := &url.URL{Host: proxy}
 	client := &http.Client{
 		Transport: &http.Transport{Proxy: http.ProxyURL(url_proxy)},
-		Timeout:   time.Duration(3 * time.Second)}
+		Timeout:   time.Duration(2 * time.Second)}
 	resp, err := client.Get("https://bihu.com")
 	if err != nil {
 		c <- QueryResp{Addr: proxy, Time: float64(-1)}
@@ -368,7 +368,7 @@ Restart:
 
 	qf := make(chan QueryFollow, 10)
 	http_start = time.Now()
-	go BH_Followlist("", p_list[proxy_idx], 3, params, qf)
+	go BH_Followlist("", p_list[proxy_idx], 4, params, qf)
 	QF := <-qf
 	follows := QF.posts
 	proxy_idx++
