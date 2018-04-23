@@ -295,6 +295,18 @@ func Update_Proxy() {
 	}
 }
 
+func get_n_proxy(n int) (list []string) {
+	for i := 0; i < n; i++ {
+		list = append(list, p_list[proxy_idx])
+
+		proxy_idx++
+		if proxy_idx >= len(p_list) {
+			proxy_idx = 0
+		}
+	}
+	return
+}
+
 func Get_Proxy() (p_l []string) {
 	p_mux.Lock()
 	p_list = proxy_list
@@ -390,13 +402,10 @@ Restart:
 
 	qf := make(chan QueryFollow, 10)
 	http_start = time.Now()
-	go Mult_Follow([]string{p_list[proxy_idx]}, params, qf)
+	go Mult_Follow(get_n_proxy(1), params, qf)
 	QF := <-qf
 	follows := QF.posts
-	proxy_idx++
-	if proxy_idx >= len(p_list) {
-		proxy_idx = 0
-	}
+
 	should_wait += http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
 
 	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
