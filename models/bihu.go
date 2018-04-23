@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"net"
 	"net/http"
 	"net/url"
@@ -444,7 +445,7 @@ Restart:
 
 	if should_wait > 1e9 {
 		time.Sleep(time.Duration(should_wait/1e9) * time.Second)
-		should_wait -= should_wait / 1e9
+		should_wait -= math.Floor(should_wait/1e9) * 1e9
 	}
 
 	if time.Now().After(refresh_check) {
