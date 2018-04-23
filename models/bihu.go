@@ -411,8 +411,27 @@ Restart:
 
 	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
 		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
+
+		// upvote first
+		if follows[0].UserName != "杨伟" {
+			params = map[string][]string{
+				"userId":      {total_users[0].BHId},
+				"accessToken": {total_users[0].BHToken},
+				"artId":       {follows[0].ArtId},
+			}
+			BH_Up(machine_ip[ip_idx], "", 5, params)
+
+			params = map[string][]string{
+				"userId":      {total_users[0].BHId},
+				"accessToken": {total_users[0].BHToken},
+				"artId":       {follows[0].ArtId},
+				"content":     {"看好你，" + follows[0].UserName},
+			}
+			BH_CM(machine_ip[ip_idx], "", 5, params)
+		}
+
 		// upvote this post
-		for u_idx := 0; u_idx < len(total_users); u_idx++ {
+		for u_idx := 1; u_idx < len(total_users); u_idx++ {
 			u := total_users[u_idx]
 			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
 				continue
@@ -424,15 +443,6 @@ Restart:
 			}
 			BH_Up(machine_ip[ip_idx], "", 5, params)
 
-			if u.BHId == "179159" {
-				params = map[string][]string{
-					"userId":      {u.BHId},
-					"accessToken": {u.BHToken},
-					"artId":       {follows[0].ArtId},
-					"content":     {"看好你，" + follows[0].UserName},
-				}
-				BH_CM(machine_ip[ip_idx], "", 5, params)
-			}
 			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
 			ip_idx--
 			if ip_idx <= -1 {
