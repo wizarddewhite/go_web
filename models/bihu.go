@@ -281,7 +281,7 @@ func Update_Proxy() {
 
 		for _, _ = range p_l {
 			r := <-resp_chan
-			if r.Time > 1e-9 {
+			if r.Time != float64(-1) {
 				vps = append(vps, r.Addr)
 			}
 		}
@@ -290,7 +290,7 @@ func Update_Proxy() {
 		proxy_list = vps
 		p_mux.Unlock()
 
-		beego.Trace("Update proxy_list with", len(proxy_list))
+		beego.Trace("Update proxy_list with", len(p_l), "pass", len(proxy_list))
 
 		time.Sleep(time.Duration(3) * time.Minute)
 	}
