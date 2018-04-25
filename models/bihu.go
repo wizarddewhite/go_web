@@ -319,6 +319,8 @@ func Get_Proxy() (p_l []string) {
 	tmp_list = proxy_list
 	p_mux.Unlock()
 
+	p_list = nil
+
 	proxys = make(map[string]Proxy, len(tmp_list))
 	for _, p := range tmp_list {
 		addr := strings.Split(p, ":")
