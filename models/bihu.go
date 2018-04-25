@@ -301,6 +301,7 @@ func Update_Proxy() {
 	}
 }
 
+// in case proxy_id points to the last one, stop here
 func get_n_proxy(n int) (list []string) {
 	for i := 0; i < n; i++ {
 		list = append(list, p_list[proxy_idx])
@@ -308,6 +309,7 @@ func get_n_proxy(n int) (list []string) {
 		proxy_idx++
 		if proxy_idx >= len(p_list) {
 			proxy_idx = 0
+			return
 		}
 	}
 	return
@@ -443,8 +445,12 @@ RefreshUser:
 	})
 
 Restart:
-	// Get proxy if necessary
-	if time.Now().After(proxy_check) {
+	/* Get proxy if necessary
+	 * a. after 5 minute
+	 * b. finish a whole round
+	 */
+
+	if time.Now().After(proxy_check) && proxy_idx == 0 {
 		Get_Proxy()
 		proxy_check = time.Now().Add(5 * time.Minute)
 	}
