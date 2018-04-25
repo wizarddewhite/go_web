@@ -42,6 +42,7 @@ func main() {
 	models.BH_retrieve_ip()
 
 	time.Sleep(5 * time.Second)
+	// models.BH_update_db()
 	go models.BH_up_vote()
 
 	beego.Run()

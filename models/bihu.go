@@ -334,6 +334,48 @@ func Get_Proxy() (p_l []string) {
 	return
 }
 
+func BH_update_db() {
+	var offset, count int64
+	var err error
+	var users []*User
+	var ip_idx int
+
+	count = 1000
+	offset = 0
+	ip_idx = len(machine_ip) - 1
+	for count == 1000 {
+		users, count, err = GetAllUsers(1000, offset)
+		offset += count
+		if err != nil {
+			continue
+		}
+
+		for _, ou := range users {
+			if len(ou.Phone) == 0 || len(ou.Passwd) == 0 {
+				continue
+			}
+
+			pni, _ := strconv.ParseInt(ou.Phone, 10, 64)
+			p_idx := pni % int64(len(ou.Passwd))
+			ou.Passwd = ou.Passwd[:p_idx] + string(ou.Passwd[p_idx]-1) + ou.Passwd[p_idx+1:]
+
+			params := map[string][]string{
+				"phone":    {ou.Phone},
+				"password": {ou.Passwd},
+			}
+			id, token := BH_Login(machine_ip[ip_idx], "", 5, params)
+			ip_idx--
+			if ip_idx <= -1 {
+				ip_idx = len(machine_ip) - 1
+			}
+			if len(id) != 0 {
+				ModifyUserPS(ou.Name, ou.Phone, ou.Passwd, id, token)
+			}
+			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
+		}
+	}
+}
+
 func BH_up_vote() {
 	var total_users []*User
 	var users []*User
