@@ -21,6 +21,11 @@ import (
 	. "github.com/bitly/go-simplejson"
 )
 
+type Proxy struct {
+	port    string
+	failure int
+}
+
 type QueryResp struct {
 	Addr string
 	Time float64
@@ -32,7 +37,7 @@ type QueryFollow struct {
 
 var p_mux sync.Mutex
 var proxy_list []string
-var proxys map[string]int
+var proxys map[string]Proxy
 var should_wait float64
 
 var p_list []string
@@ -309,13 +314,20 @@ func get_n_proxy(n int) (list []string) {
 }
 
 func Get_Proxy() (p_l []string) {
+	var tmp_list []string
 	p_mux.Lock()
-	p_list = proxy_list
+	tmp_list = proxy_list
 	p_mux.Unlock()
 
-	proxys = make(map[string]int, len(p_list))
-	for _, p := range p_list {
-		proxys[p] = 0
+	proxys = make(map[string]Proxy, len(tmp_list))
+	for _, p := range tmp_list {
+		addr := strings.Split(p, ":")
+		if _, ok := proxys[addr[0]]; ok {
+			beego.Trace("proxy", p, "already exist")
+		} else {
+			proxys[addr[0]] = Proxy{addr[1], 0}
+			p_list = append(p_list, p)
+		}
 	}
 	http_slice = float64(36) * 1e9 / float64(len(p_list))
 	proxy_idx = 0
