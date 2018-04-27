@@ -255,8 +255,11 @@ func query_proxy(proxy string, c chan QueryResp) {
 	start_ts := time.Now()
 	url_proxy := &url.URL{Host: proxy}
 	client := &http.Client{
-		Transport: &http.Transport{Proxy: http.ProxyURL(url_proxy)},
-		Timeout:   time.Duration(2 * time.Second)}
+		Transport: &http.Transport{
+			Proxy:           http.ProxyURL(url_proxy),
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+		Timeout: time.Duration(2 * time.Second)}
 	resp, err := client.Get("https://bihu.com")
 	if err != nil {
 		c <- QueryResp{Addr: proxy, Time: float64(-1)}
