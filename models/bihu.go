@@ -259,7 +259,7 @@ func query_proxy(proxy string, c chan QueryResp) {
 			Proxy:           http.ProxyURL(url_proxy),
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
-		Timeout: time.Duration(2 * time.Second)}
+		Timeout: time.Duration(3 * time.Second)}
 	resp, err := client.Get("https://bihu.com")
 	if err != nil {
 		if strings.Contains(err.Error(), "sock") {
@@ -303,7 +303,7 @@ func Update_Proxy() {
 
 		beego.Trace("Update proxy_list with", len(p_l), "pass", len(proxy_list))
 
-		time.Sleep(time.Duration(5) * time.Minute)
+		time.Sleep(time.Duration(30) * time.Minute)
 	}
 }
 
@@ -339,7 +339,7 @@ func Get_Proxy() (p_l []string) {
 			p_list = append(p_list, p)
 		}
 	}
-	http_slice = float64(36) * 1e9 / float64(len(p_list))
+	http_slice = float64(42) * 1e9 / float64(len(p_list))
 	proxy_idx = 0
 	return
 }
