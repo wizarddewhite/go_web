@@ -262,6 +262,9 @@ func query_proxy(proxy string, c chan QueryResp) {
 		Timeout: time.Duration(2 * time.Second)}
 	resp, err := client.Get("https://bihu.com")
 	if err != nil {
+		if strings.Contains(err.Error(), "sock") {
+			beego.Trace(err)
+		}
 		c <- QueryResp{Addr: proxy, Time: float64(-1)}
 		return
 	}
