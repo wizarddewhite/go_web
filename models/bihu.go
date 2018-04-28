@@ -35,6 +35,8 @@ type QueryFollow struct {
 	posts []BH_Post
 }
 
+var Raw_Proxys int
+
 var p_mux sync.Mutex
 var proxy_list []string
 var proxys map[string]Proxy
@@ -280,20 +282,31 @@ func query_proxy(proxy string, c chan QueryResp) {
 
 func Update_Proxy() {
 	var vps []string
+	var s_idx, e_idx int
+
 	for {
 		p_l := retrieve_proxy_list()
-
-		resp_chan := make(chan QueryResp, 10)
-		for _, proxy := range p_l {
-			go query_proxy(proxy, resp_chan)
-		}
+		Raw_Proxys = len(p_l)
 
 		vps = nil
+		resp_chan := make(chan QueryResp, 10)
 
-		for _, _ = range p_l {
-			r := <-resp_chan
-			if r.Time != float64(-1) {
-				vps = append(vps, r.Addr)
+		for s_idx = 0; s_idx < len(p_l); s_idx += 100 {
+			e_idx = s_idx + 100
+			if e_idx >= len(p_l) {
+				e_idx = len(p_l) - 1
+			}
+			slice := p_l[s_idx:e_idx]
+
+			for _, proxy := range slice {
+				go query_proxy(proxy, resp_chan)
+			}
+
+			for _, _ = range slice {
+				r := <-resp_chan
+				if r.Time != float64(-1) {
+					vps = append(vps, r.Addr)
+				}
 			}
 		}
 
