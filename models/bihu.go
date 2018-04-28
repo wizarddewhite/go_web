@@ -334,7 +334,7 @@ func get_n_proxy(n int) (list []string) {
 	return
 }
 
-func Get_Proxy() (p_l []string) {
+func Get_Proxy() {
 	var tmp_list []string
 	p_mux.Lock()
 	tmp_list = proxy_list
