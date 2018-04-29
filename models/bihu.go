@@ -35,6 +35,10 @@ type QueryFollow struct {
 	posts []BH_Post
 }
 
+type QueryUp struct {
+	params map[string][]string
+}
+
 var Raw_Proxys int
 
 var p_mux sync.Mutex
@@ -45,6 +49,8 @@ var should_wait float64
 var p_list []string
 var http_slice float64
 var proxy_idx int
+
+var failures []QueryUp
 
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 
@@ -127,6 +133,41 @@ func BH_Up(addr, proxy string, to int, params map[string][]string) (status int, 
 		cnt = string(body[:20])
 	}
 	return
+}
+
+func BH_Up_c(addr, proxy string, to int, params map[string][]string, p chan int) {
+	_, body := bihu(to, addr, proxy, "/api/content/upVote", params)
+	if len(body) > 20 &&
+		strings.Contains(string(body[:20]), "data") {
+		p <- 0
+	} else {
+		p <- -1
+	}
+}
+
+func Multi_BH_UP(proxy []string, to int, params map[string][]string) {
+	var has_succ bool
+
+	state := make(chan int)
+	http_start := time.Now()
+	for _, p := range proxy {
+		go BH_Up_c("", p, to, params, state)
+	}
+
+	has_succ = false
+	for _, _ = range proxy {
+		r := <-state
+		if r == 0 {
+			has_succ = true
+		}
+	}
+
+	should_wait += float64(len(proxy))*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
+
+	// add to failures if not success
+	if !has_succ {
+		failures = append(failures, QueryUp{params})
+	}
 }
 
 type BH_Post struct {
@@ -521,12 +562,27 @@ Restart:
 				"accessToken": {u.BHToken},
 				"artId":       {follows[0].ArtId},
 			}
-			BH_Up(machine_ip[ip_idx], "", 5, params)
 
-			time.Sleep(time.Duration(36/len(machine_ip)) * time.Second)
-			ip_idx--
-			if ip_idx <= -1 {
-				ip_idx = len(machine_ip) - 1
+			Multi_BH_UP(get_n_proxy(2), 5, params)
+
+			if should_wait > 3e9 {
+				time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+				should_wait -= math.Floor(should_wait/1e9) * 1e9
+			}
+		}
+
+		// handle those failures until it is empty
+		for len(failures) != 0 {
+			// take of the list and empty it
+			tmp := failures
+			failures = nil
+
+			for _, p := range tmp {
+				Multi_BH_UP(get_n_proxy(2), 5, p.params)
+				if should_wait > 3e9 {
+					time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+					should_wait -= math.Floor(should_wait/1e9) * 1e9
+				}
 			}
 		}
 
