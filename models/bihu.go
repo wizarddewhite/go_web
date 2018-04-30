@@ -205,6 +205,8 @@ func BH_Followlist(addr, proxy string, to int, params map[string][]string, p cha
 	return
 }
 
+var lastId string
+
 func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow) {
 	catched := false
 
@@ -215,8 +217,9 @@ func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow)
 
 	for _, _ = range proxy {
 		QF := <-qf
-		if len(QF.posts) != 0 && !catched {
+		if len(QF.posts) != 0 && !catched && QF.posts[0].ArtId != lastId {
 			catched = true
+			lastId = QF.posts[0].ArtId
 			p <- QF
 		}
 	}
