@@ -237,10 +237,6 @@ func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow)
 	}
 
 	should_wait += float64(len(proxy))*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
-
-	if !catched {
-		p <- QueryFollow{[]BH_Post{}}
-	}
 }
 
 func BH_CM(addr, proxy string, to int, params map[string][]string) {
