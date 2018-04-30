@@ -52,6 +52,8 @@ var proxy_idx int
 
 var failures []QueryUp
 
+var QF chan QueryFollow
+
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 
 	localaddr, _ := net.ResolveTCPAddr("tcp", addr+":0")
@@ -523,10 +525,10 @@ Restart:
 		"accessToken": {ptk},
 	}
 
-	qf := make(chan QueryFollow, 10)
+	QF = make(chan QueryFollow, 10)
 	http_start = time.Now()
-	go Mult_Follow(get_n_proxy(2), params, qf)
-	QF := <-qf
+	go Mult_Follow(get_n_proxy(2), params, QF)
+	QF := <-QF
 	should_wait += 2*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
 	follows := QF.posts
 
