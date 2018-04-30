@@ -205,11 +205,15 @@ func BH_Followlist(addr, proxy string, to int, params map[string][]string, p cha
 	return
 }
 
+var lid_mux sync.Mutex
 var lastId string
 
 func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow) {
 	catched := false
 	http_start := time.Now()
+
+	// check last two minute posts
+	post_check := time.Now().UTC().Add(-time.Second * time.Duration(15))
 
 	qf := make(chan QueryFollow, len(proxy))
 	for _, p := range proxy {
@@ -218,10 +222,16 @@ func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow)
 
 	for _, _ = range proxy {
 		QF := <-qf
-		if len(QF.posts) != 0 && !catched && QF.posts[0].ArtId != lastId {
-			catched = true
-			lastId = QF.posts[0].ArtId
-			p <- QF
+		if len(QF.posts) != 0 && !catched {
+			last_post := QF.posts[0]
+
+			lid_mux.Lock()
+			if last_post.ArtId != lastId && time.Unix(last_post.CT/1000, 0).After(post_check) {
+				catched = true
+				lastId = QF.posts[0].ArtId
+				p <- QF
+			}
+			lid_mux.Unlock()
 		}
 	}
 
@@ -458,10 +468,7 @@ func Upvote_BH(res chan int) {
 		QF := <-QF
 		follows := QF.posts
 
-		// check last two minute posts
-		post_check := time.Now().UTC().Add(-time.Second * time.Duration(15))
-
-		if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
+		if len(follows) != 0 {
 			beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
 
 			// upvote first
