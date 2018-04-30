@@ -209,6 +209,7 @@ var lastId string
 
 func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow) {
 	catched := false
+	http_start := time.Now()
 
 	qf := make(chan QueryFollow, len(proxy))
 	for _, p := range proxy {
@@ -223,6 +224,8 @@ func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow)
 			p <- QF
 		}
 	}
+
+	should_wait += float64(len(proxy))*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
 
 	if !catched {
 		p <- QueryFollow{[]BH_Post{}}
@@ -448,11 +451,13 @@ func BH_update_db() {
 	}
 }
 
-func __up_vote(http_start, post_check time.Time, res chan int) {
+func Upvote_BH(res chan int) {
 	var params map[string][]string
 	QF := <-QF
-	should_wait += 2*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
 	follows := QF.posts
+
+	// check last two minute posts
+	post_check := time.Now().UTC().Add(-time.Second * time.Duration(15))
 
 	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
 		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
@@ -520,11 +525,9 @@ func BH_up_vote() {
 	var users []*User
 	var offset, count int64
 	var err error
-	var post_check, proxy_check time.Time
+	var proxy_check time.Time
 	var params map[string][]string
 	var pid, ptk string
-
-	var http_start time.Time
 
 	// set proxy_check to past to force the first time get
 	proxy_check = time.Now().Add(-time.Minute)
@@ -587,9 +590,6 @@ Restart:
 		proxy_check = time.Now().Add(5 * time.Minute)
 	}
 
-	// check last two minute posts
-	post_check = time.Now().UTC().Add(-time.Minute * time.Duration(2))
-
 	params = map[string][]string{
 		"userId":      {pid},
 		"accessToken": {ptk},
@@ -597,9 +597,8 @@ Restart:
 
 	QF = make(chan QueryFollow, 10)
 	QU = make(chan int, 10)
-	http_start = time.Now()
 	go Mult_Follow(get_n_proxy(2), params, QF)
-	go __up_vote(http_start, post_check, QU)
+	go Upvote_BH(QU)
 	<-QU
 
 	if should_wait > 1e9 {
