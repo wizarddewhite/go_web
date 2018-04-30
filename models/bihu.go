@@ -55,6 +55,7 @@ var total_users []*User
 
 var QF chan QueryFollow
 var QU chan int
+var up_voting bool
 
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 
@@ -470,6 +471,7 @@ func Upvote_BH(res chan int) {
 
 		if len(follows) != 0 {
 			beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
+			up_voting = true
 
 			// upvote first
 			if follows[0].UserName != "杨伟" {
@@ -527,6 +529,7 @@ func Upvote_BH(res chan int) {
 			AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
 		}
 
+		up_voting = false
 		res <- 1
 	}
 }
@@ -542,6 +545,7 @@ func BH_up_vote() {
 	// set proxy_check to past to force the first time get
 	proxy_check = time.Now().Add(-time.Minute)
 	should_wait = 0
+	up_voting = false
 
 RefreshUser:
 
@@ -605,13 +609,12 @@ Restart:
 		"accessToken": {ptk},
 	}
 
-	go Mult_Follow(get_n_proxy(2), params, QF)
-	<-QU
-
-	if should_wait > 1e9 {
-		time.Sleep(time.Duration(should_wait/1e9) * time.Second)
-		should_wait -= math.Floor(should_wait/1e9) * 1e9
+	if up_voting {
+		<-QU
 	}
+
+	go Mult_Follow(get_n_proxy(2), params, QF)
+	time.Sleep(time.Duration(http_slice*2) * time.Nanosecond)
 
 	if time.Now().After(refresh_check) {
 		goto RefreshUser
