@@ -216,6 +216,7 @@ func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow)
 	for _, _ = range proxy {
 		QF := <-qf
 		if len(QF.posts) != 0 && !catched {
+			catched = true
 			p <- QF
 		}
 	}
