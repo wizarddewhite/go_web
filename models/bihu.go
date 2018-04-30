@@ -222,15 +222,15 @@ func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow)
 	}
 
 	for _, _ = range proxy {
-		QF := <-qf
-		if len(QF.posts) != 0 && !catched {
-			last_post := QF.posts[0]
+		fl := <-qf
+		if len(fl.posts) != 0 && !catched {
+			last_post := fl.posts[0]
 
 			lid_mux.Lock()
 			if last_post.ArtId != lastId && time.Unix(last_post.CT/1000, 0).After(post_check) {
 				catched = true
-				lastId = QF.posts[0].ArtId
-				p <- QF
+				lastId = fl.posts[0].ArtId
+				p <- fl
 			}
 			lid_mux.Unlock()
 		}
@@ -466,8 +466,8 @@ func Upvote_BH(res chan int) {
 	var params map[string][]string
 
 	for {
-		QF := <-QF
-		follows := QF.posts
+		fl := <-QF
+		follows := fl.posts
 
 		if len(follows) != 0 {
 			beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
