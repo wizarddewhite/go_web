@@ -51,8 +51,10 @@ var http_slice float64
 var proxy_idx int
 
 var failures []QueryUp
+var total_users []*User
 
 var QF chan QueryFollow
+var QU chan int
 
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 
@@ -442,8 +444,75 @@ func BH_update_db() {
 	}
 }
 
+func __up_vote(http_start, post_check time.Time, res chan int) {
+	var params map[string][]string
+	QF := <-QF
+	should_wait += 2*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
+	follows := QF.posts
+
+	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
+		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
+
+		// upvote first
+		if follows[0].UserName != "杨伟" {
+			params = map[string][]string{
+				"userId":      {total_users[0].BHId},
+				"accessToken": {total_users[0].BHToken},
+				"artId":       {follows[0].ArtId},
+			}
+			BH_Up(machine_ip[len(machine_ip)-1], "", 5, params)
+
+			params = map[string][]string{
+				"userId":      {total_users[0].BHId},
+				"accessToken": {total_users[0].BHToken},
+				"artId":       {follows[0].ArtId},
+				"content":     {"看好你，" + follows[0].UserName},
+			}
+			BH_CM(machine_ip[len(machine_ip)-1], "", 5, params)
+		}
+
+		// upvote this post
+		for u_idx := 1; u_idx < len(total_users); u_idx++ {
+			u := total_users[u_idx]
+			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
+				continue
+			}
+			params = map[string][]string{
+				"userId":      {u.BHId},
+				"accessToken": {u.BHToken},
+				"artId":       {follows[0].ArtId},
+			}
+
+			Multi_BH_UP(get_n_proxy(2), 5, params)
+
+			if should_wait > 3e9 {
+				time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+				should_wait -= math.Floor(should_wait/1e9) * 1e9
+			}
+		}
+
+		// handle those failures until it is empty
+		for len(failures) != 0 {
+			// take of the list and empty it
+			tmp := failures
+			failures = nil
+
+			for _, p := range tmp {
+				Multi_BH_UP(get_n_proxy(2), 5, p.params)
+				if should_wait > 3e9 {
+					time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+					should_wait -= math.Floor(should_wait/1e9) * 1e9
+				}
+			}
+		}
+
+		AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
+	}
+
+	res <- 1
+}
+
 func BH_up_vote() {
-	var total_users []*User
 	var users []*User
 	var offset, count int64
 	var err error
@@ -451,14 +520,11 @@ func BH_up_vote() {
 	var params map[string][]string
 	var pid, ptk string
 
-	var ip_idx int
 	var http_start time.Time
 
 	// set proxy_check to past to force the first time get
 	proxy_check = time.Now().Add(-time.Minute)
 	should_wait = 0
-
-	ip_idx = len(machine_ip) - 1
 
 RefreshUser:
 
@@ -526,70 +592,11 @@ Restart:
 	}
 
 	QF = make(chan QueryFollow, 10)
+	QU = make(chan int, 10)
 	http_start = time.Now()
 	go Mult_Follow(get_n_proxy(2), params, QF)
-	QF := <-QF
-	should_wait += 2*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
-	follows := QF.posts
-
-	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
-		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
-
-		// upvote first
-		if follows[0].UserName != "杨伟" {
-			params = map[string][]string{
-				"userId":      {total_users[0].BHId},
-				"accessToken": {total_users[0].BHToken},
-				"artId":       {follows[0].ArtId},
-			}
-			BH_Up(machine_ip[ip_idx], "", 5, params)
-
-			params = map[string][]string{
-				"userId":      {total_users[0].BHId},
-				"accessToken": {total_users[0].BHToken},
-				"artId":       {follows[0].ArtId},
-				"content":     {"看好你，" + follows[0].UserName},
-			}
-			BH_CM(machine_ip[ip_idx], "", 5, params)
-		}
-
-		// upvote this post
-		for u_idx := 1; u_idx < len(total_users); u_idx++ {
-			u := total_users[u_idx]
-			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
-				continue
-			}
-			params = map[string][]string{
-				"userId":      {u.BHId},
-				"accessToken": {u.BHToken},
-				"artId":       {follows[0].ArtId},
-			}
-
-			Multi_BH_UP(get_n_proxy(2), 5, params)
-
-			if should_wait > 3e9 {
-				time.Sleep(time.Duration(should_wait/1e9) * time.Second)
-				should_wait -= math.Floor(should_wait/1e9) * 1e9
-			}
-		}
-
-		// handle those failures until it is empty
-		for len(failures) != 0 {
-			// take of the list and empty it
-			tmp := failures
-			failures = nil
-
-			for _, p := range tmp {
-				Multi_BH_UP(get_n_proxy(2), 5, p.params)
-				if should_wait > 3e9 {
-					time.Sleep(time.Duration(should_wait/1e9) * time.Second)
-					should_wait -= math.Floor(should_wait/1e9) * 1e9
-				}
-			}
-		}
-
-		AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
-	}
+	go __up_vote(http_start, post_check, QU)
+	<-QU
 
 	if should_wait > 1e9 {
 		time.Sleep(time.Duration(should_wait/1e9) * time.Second)
