@@ -41,9 +41,12 @@ func main() {
 	go models.Update_Proxy()
 	models.BH_retrieve_ip()
 
+	models.QF = make(chan models.QueryFollow, 10)
+	models.QU = make(chan int, 10)
 	time.Sleep(5 * time.Second)
 	time.Sleep(time.Duration(models.Raw_Proxys*3/100) * time.Second)
 	// models.BH_update_db()
+	go models.Upvote_BH(models.QU)
 	go models.BH_up_vote()
 
 	beego.Run()

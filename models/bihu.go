@@ -453,72 +453,75 @@ func BH_update_db() {
 
 func Upvote_BH(res chan int) {
 	var params map[string][]string
-	QF := <-QF
-	follows := QF.posts
 
-	// check last two minute posts
-	post_check := time.Now().UTC().Add(-time.Second * time.Duration(15))
+	for {
+		QF := <-QF
+		follows := QF.posts
 
-	if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
-		beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
+		// check last two minute posts
+		post_check := time.Now().UTC().Add(-time.Second * time.Duration(15))
 
-		// upvote first
-		if follows[0].UserName != "杨伟" {
-			params = map[string][]string{
-				"userId":      {total_users[0].BHId},
-				"accessToken": {total_users[0].BHToken},
-				"artId":       {follows[0].ArtId},
-			}
-			BH_Up(machine_ip[len(machine_ip)-1], "", 5, params)
+		if len(follows) != 0 && time.Unix(follows[0].CT/1000, 0).After(post_check) {
+			beego.Trace("Lastest post from", follows[0].UserName, "is", follows[0].ArtId)
 
-			params = map[string][]string{
-				"userId":      {total_users[0].BHId},
-				"accessToken": {total_users[0].BHToken},
-				"artId":       {follows[0].ArtId},
-				"content":     {"看好你，" + follows[0].UserName},
-			}
-			BH_CM(machine_ip[len(machine_ip)-1], "", 5, params)
-		}
+			// upvote first
+			if follows[0].UserName != "杨伟" {
+				params = map[string][]string{
+					"userId":      {total_users[0].BHId},
+					"accessToken": {total_users[0].BHToken},
+					"artId":       {follows[0].ArtId},
+				}
+				BH_Up(machine_ip[len(machine_ip)-1], "", 5, params)
 
-		// upvote this post
-		for u_idx := 1; u_idx < len(total_users); u_idx++ {
-			u := total_users[u_idx]
-			if len(u.BHId) == 0 || len(u.BHToken) == 0 {
-				continue
-			}
-			params = map[string][]string{
-				"userId":      {u.BHId},
-				"accessToken": {u.BHToken},
-				"artId":       {follows[0].ArtId},
+				params = map[string][]string{
+					"userId":      {total_users[0].BHId},
+					"accessToken": {total_users[0].BHToken},
+					"artId":       {follows[0].ArtId},
+					"content":     {"看好你，" + follows[0].UserName},
+				}
+				BH_CM(machine_ip[len(machine_ip)-1], "", 5, params)
 			}
 
-			Multi_BH_UP(get_n_proxy(2), 5, params)
+			// upvote this post
+			for u_idx := 1; u_idx < len(total_users); u_idx++ {
+				u := total_users[u_idx]
+				if len(u.BHId) == 0 || len(u.BHToken) == 0 {
+					continue
+				}
+				params = map[string][]string{
+					"userId":      {u.BHId},
+					"accessToken": {u.BHToken},
+					"artId":       {follows[0].ArtId},
+				}
 
-			if should_wait > 3e9 {
-				time.Sleep(time.Duration(should_wait/1e9) * time.Second)
-				should_wait -= math.Floor(should_wait/1e9) * 1e9
-			}
-		}
+				Multi_BH_UP(get_n_proxy(2), 5, params)
 
-		// handle those failures until it is empty
-		for len(failures) != 0 {
-			// take of the list and empty it
-			tmp := failures
-			failures = nil
-
-			for _, p := range tmp {
-				Multi_BH_UP(get_n_proxy(2), 5, p.params)
 				if should_wait > 3e9 {
 					time.Sleep(time.Duration(should_wait/1e9) * time.Second)
 					should_wait -= math.Floor(should_wait/1e9) * 1e9
 				}
 			}
+
+			// handle those failures until it is empty
+			for len(failures) != 0 {
+				// take of the list and empty it
+				tmp := failures
+				failures = nil
+
+				for _, p := range tmp {
+					Multi_BH_UP(get_n_proxy(2), 5, p.params)
+					if should_wait > 3e9 {
+						time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+						should_wait -= math.Floor(should_wait/1e9) * 1e9
+					}
+				}
+			}
+
+			AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
 		}
 
-		AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
+		res <- 1
 	}
-
-	res <- 1
 }
 
 func BH_up_vote() {
@@ -595,10 +598,7 @@ Restart:
 		"accessToken": {ptk},
 	}
 
-	QF = make(chan QueryFollow, 10)
-	QU = make(chan int, 10)
 	go Mult_Follow(get_n_proxy(2), params, QF)
-	go Upvote_BH(QU)
 	<-QU
 
 	if should_wait > 1e9 {
