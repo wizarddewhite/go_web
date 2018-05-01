@@ -65,6 +65,7 @@ func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []b
 	req := &http.Request{
 		Method: "POST",
 		Header: header,
+		Close:  true,
 	}
 
 	req.URL, _ = url.Parse("https://be02.bihu.com/bihube-pc" + api)
@@ -83,7 +84,8 @@ func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []b
 			Timeout:   time.Duration(to) * time.Second,
 			KeepAlive: time.Duration(to) * time.Second,
 			LocalAddr: localaddr}).Dial,
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+		DisableKeepAlives: true,
 	}
 
 	client := &http.Client{
@@ -295,10 +297,17 @@ func retrieve_proxy_list() (p_l []string) {
 	req := &http.Request{
 		Method: "GET",
 		Header: header,
+		Close:  true,
 	}
 
 	req.URL, _ = url.Parse("http://127.0.0.1:5010/get_all/")
-	client := &http.Client{Timeout: time.Duration(5 * time.Second)}
+	tr := &http.Transport{
+		DisableKeepAlives: true,
+	}
+	client := &http.Client{
+		Timeout:   time.Duration(5 * time.Second),
+		Transport: tr,
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return
@@ -327,6 +336,7 @@ func query_proxy(proxy string, c chan QueryResp) {
 	req := &http.Request{
 		Method: "GET",
 		Header: header,
+		Close:  true,
 	}
 	req.URL, _ = url.Parse("https://bihu.com")
 
@@ -334,8 +344,9 @@ func query_proxy(proxy string, c chan QueryResp) {
 	url_proxy := &url.URL{Host: proxy}
 	client := &http.Client{
 		Transport: &http.Transport{
-			Proxy:           http.ProxyURL(url_proxy),
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+			Proxy:             http.ProxyURL(url_proxy),
+			TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
+			DisableKeepAlives: true,
 		},
 		Timeout: time.Duration(3 * time.Second)}
 	resp, err := client.Do(req)
