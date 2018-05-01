@@ -58,14 +58,25 @@ var QU chan int
 var up_voting bool
 
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
+	header := map[string][]string{
+		"Connection": {"close"},
+	}
+
+	req := &http.Request{
+		Method: "POST",
+		Header: header,
+	}
+
+	req.URL, _ = url.Parse("https://be02.bihu.com/bihube-pc" + api)
+	q := req.URL.Query()
+	q = params
+	req.URL.RawQuery = q.Encode()
 
 	localaddr, _ := net.ResolveTCPAddr("tcp", addr+":0")
-
 	proxyUrl, _ := url.Parse("http://" + proxy)
 	if len(proxy) == 0 {
 		proxyUrl = nil
 	}
-
 	tr := &http.Transport{
 		Proxy: http.ProxyURL(proxyUrl),
 		Dial: (&net.Dialer{
@@ -74,15 +85,6 @@ func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []b
 			LocalAddr: localaddr}).Dial,
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-
-	req := &http.Request{
-		Method: "POST",
-	}
-
-	req.URL, _ = url.Parse("https://be02.bihu.com/bihube-pc" + api)
-	q := req.URL.Query()
-	q = params
-	req.URL.RawQuery = q.Encode()
 
 	client := &http.Client{
 		Timeout:   time.Duration(to) * time.Second,
@@ -286,8 +288,13 @@ func send_data(s Sibling) {
 }
 
 func retrieve_proxy_list() (p_l []string) {
+	header := map[string][]string{
+		"Connection": {"close"},
+	}
+
 	req := &http.Request{
 		Method: "GET",
+		Header: header,
 	}
 
 	req.URL, _ = url.Parse("http://127.0.0.1:5010/get_all/")
@@ -313,6 +320,16 @@ func retrieve_proxy_list() (p_l []string) {
 
 /* query timeout is 2 second */
 func query_proxy(proxy string, c chan QueryResp) {
+	header := map[string][]string{
+		"Connection": {"close"},
+	}
+
+	req := &http.Request{
+		Method: "GET",
+		Header: header,
+	}
+	req.URL, _ = url.Parse("https://bihu.com")
+
 	start_ts := time.Now()
 	url_proxy := &url.URL{Host: proxy}
 	client := &http.Client{
@@ -321,7 +338,7 @@ func query_proxy(proxy string, c chan QueryResp) {
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 		Timeout: time.Duration(3 * time.Second)}
-	resp, err := client.Get("https://bihu.com")
+	resp, err := client.Do(req)
 	if err != nil {
 		if strings.Contains(err.Error(), "sock") {
 			beego.Trace(err)
