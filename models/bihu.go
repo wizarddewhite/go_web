@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"math"
 	"net"
@@ -353,6 +354,7 @@ func query_proxy(proxy string, c chan QueryResp) {
 			TLSHandshakeTimeout: time.Duration(3) * time.Second,
 			TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 			DisableKeepAlives:   true,
+			IdleConnTimeout:     3 * time.Second,
 		},
 		Timeout: time.Duration(3 * time.Second)}
 	resp, err := client.Do(req)
@@ -363,6 +365,7 @@ func query_proxy(proxy string, c chan QueryResp) {
 		c <- QueryResp{Addr: proxy, Time: float64(-1)}
 		return
 	}
+	defer io.Copy(ioutil.Discard, resp.Body)
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
 	time_diff := time.Now().UnixNano() - start_ts.UnixNano()
@@ -371,6 +374,9 @@ func query_proxy(proxy string, c chan QueryResp) {
 	} else {
 		c <- QueryResp{Addr: proxy, Time: float64(-1)}
 	}
+	time.Sleep(3 * time.Second)
+	t := client.Transport.(*http.Transport)
+	t.CloseIdleConnections()
 }
 
 func Update_Proxy() {
