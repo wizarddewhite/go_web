@@ -82,10 +82,11 @@ func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []b
 		Proxy: http.ProxyURL(proxyUrl),
 		Dial: (&net.Dialer{
 			Timeout:   time.Duration(to) * time.Second,
-			KeepAlive: time.Duration(to) * time.Second,
+			KeepAlive: 0,
 			LocalAddr: localaddr}).Dial,
-		TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
-		DisableKeepAlives: true,
+		TLSHandshakeTimeout: time.Duration(to) * time.Second,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+		DisableKeepAlives:   true,
 	}
 
 	client := &http.Client{
@@ -344,9 +345,14 @@ func query_proxy(proxy string, c chan QueryResp) {
 	url_proxy := &url.URL{Host: proxy}
 	client := &http.Client{
 		Transport: &http.Transport{
-			Proxy:             http.ProxyURL(url_proxy),
-			TLSClientConfig:   &tls.Config{InsecureSkipVerify: true},
-			DisableKeepAlives: true,
+			Proxy: http.ProxyURL(url_proxy),
+			Dial: (&net.Dialer{
+				Timeout:   time.Duration(3) * time.Second,
+				KeepAlive: 0,
+			}).Dial,
+			TLSHandshakeTimeout: time.Duration(3) * time.Second,
+			TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+			DisableKeepAlives:   true,
 		},
 		Timeout: time.Duration(3 * time.Second)}
 	resp, err := client.Do(req)
