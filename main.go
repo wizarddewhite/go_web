@@ -44,7 +44,7 @@ func main() {
 	models.QF = make(chan models.QueryFollow, 10)
 	models.QU = make(chan int, 10)
 	time.Sleep(5 * time.Second)
-	time.Sleep(time.Duration(models.Raw_Proxys*3/100) * time.Second)
+	time.Sleep(time.Duration(models.Raw_Proxys*3/300) * time.Second)
 	// models.BH_update_db()
 	go models.Upvote_BH(models.QU)
 	go models.BH_up_vote()

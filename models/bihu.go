@@ -400,8 +400,8 @@ func Update_Proxy() {
 		vps = nil
 		resp_chan := make(chan QueryResp, 10)
 
-		for s_idx = 0; s_idx < len(p_l); s_idx += 100 {
-			e_idx = s_idx + 100
+		for s_idx = 0; s_idx < len(p_l); s_idx += 300 {
+			e_idx = s_idx + 300
 			if e_idx >= len(p_l) {
 				e_idx = len(p_l) - 1
 			}
