@@ -44,7 +44,7 @@ type QueryUp struct {
 	params map[string][]string
 }
 
-var Raw_Proxys int
+var Started bool
 
 var p_mux sync.Mutex
 var proxy_list []string
@@ -59,6 +59,7 @@ var proxy_idx int
 var failures []QueryUp
 var total_users []*User
 
+var QP chan int
 var QF chan QueryFollow
 var QU chan int
 var up_voting bool
@@ -395,7 +396,6 @@ func Update_Proxy() {
 
 	for {
 		p_l := retrieve_proxy_list()
-		Raw_Proxys = len(p_l)
 
 		vps = nil
 		resp_chan := make(chan QueryResp, 10)
@@ -424,6 +424,11 @@ func Update_Proxy() {
 		p_mux.Unlock()
 
 		beego.Trace("Update proxy_list with", len(p_l), "pass", len(proxy_list))
+
+		if !Started {
+			Started = true
+			QP <- 1
+		}
 
 		time.Sleep(time.Duration(30) * time.Minute)
 	}

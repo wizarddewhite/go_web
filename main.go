@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -38,13 +36,15 @@ func main() {
 
 	logs.SetLogger(logs.AdapterFile, `{"filename":"logs/freeland.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
 
+	models.Started = false
+	models.QP = make(chan int, 10)
 	go models.Update_Proxy()
 	models.BH_retrieve_ip()
 
 	models.QF = make(chan models.QueryFollow, 10)
 	models.QU = make(chan int, 10)
-	time.Sleep(5 * time.Second)
-	time.Sleep(time.Duration(models.Raw_Proxys*3/300) * time.Second)
+
+	<-models.QP
 	// models.BH_update_db()
 	go models.Upvote_BH(models.QU)
 	go models.BH_up_vote()
