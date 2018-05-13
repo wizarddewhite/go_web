@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"os/exec"
 	"sort"
 	"strconv"
@@ -681,6 +682,11 @@ Restart:
 
 	if time.Now().After(refresh_check) {
 		goto RefreshUser
+	}
+
+	hour, _, _ := time.Now().Clock()
+	if hour < 5 {
+		os.Exit(1)
 	}
 
 	goto Restart
