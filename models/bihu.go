@@ -359,7 +359,7 @@ func query_proxy(proxy string, c chan QueryResp) {
 		Timeout: time.Duration(3 * time.Second)}
 	resp, err := client.Do(req)
 	if err != nil {
-		if strings.Contains(err.Error(), "sock") {
+		if strings.Contains(err.Error(), "socket") {
 			beego.Trace(err)
 		}
 		c <- QueryResp{Addr: proxy, Time: float64(-1)}
