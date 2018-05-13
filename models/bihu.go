@@ -562,7 +562,9 @@ func Upvote_BH(res chan int) {
 				}
 			}
 
-			AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
+			if follows[0].UserName != "无闻" {
+				AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
+			}
 		}
 
 		up_voting = false
