@@ -215,7 +215,7 @@ func BH_Followlist(addr, proxy string, to int, params map[string][]string, p cha
 var lid_mux sync.Mutex
 var lastId string
 
-func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow) {
+func Mult_Follow(proxy []string, params map[string][]string) {
 	catched := false
 	http_start := time.Now()
 
@@ -236,7 +236,7 @@ func Mult_Follow(proxy []string, params map[string][]string, p chan QueryFollow)
 			if last_post.ArtId != lastId && time.Unix(last_post.CT/1000, 0).After(post_check) {
 				catched = true
 				lastId = fl.posts[0].ArtId
-				p <- fl
+				QF <- fl
 			}
 			lid_mux.Unlock()
 		}
@@ -649,7 +649,7 @@ Restart:
 		<-QU
 	}
 
-	go Mult_Follow(get_n_proxy(2), params, QF)
+	go Mult_Follow(get_n_proxy(2), params)
 	time.Sleep(time.Duration(http_slice*2) * time.Nanosecond)
 
 	if time.Now().After(refresh_check) {
