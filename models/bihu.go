@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
@@ -20,6 +21,8 @@ import (
 	"github.com/astaxie/beego"
 
 	. "github.com/bitly/go-simplejson"
+
+	"golang.org/x/sync/semaphore"
 )
 
 type Proxy struct {
@@ -45,6 +48,7 @@ var Raw_Proxys int
 var p_mux sync.Mutex
 var proxy_list []string
 var proxys map[string]Proxy
+var sw_mux sync.Mutex
 var should_wait float64
 
 var p_list []string
@@ -57,6 +61,8 @@ var total_users []*User
 var QF chan QueryFollow
 var QU chan int
 var up_voting bool
+
+var UP_Sem *semaphore.Weighted
 
 func bihu(to int, addr, proxy, api string, params map[string][]string) (int, []byte) {
 	header := map[string][]string{
@@ -173,12 +179,15 @@ func Multi_BH_UP(proxy []string, to int, params map[string][]string) {
 		}
 	}
 
+	sw_mux.Lock()
 	should_wait += float64(len(proxy))*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
+	sw_mux.Unlock()
 
 	// add to failures if not success
 	if !has_succ {
 		failures = append(failures, QueryUp{params})
 	}
+	UP_Sem.Release(1)
 }
 
 type BH_Post struct {
@@ -528,6 +537,8 @@ func Upvote_BH(res chan int) {
 			}
 
 			// upvote this post
+			UP_Sem = semaphore.NewWeighted(int64(len(total_users) - 1))
+			ctx := context.TODO()
 			for u_idx := 1; u_idx < len(total_users); u_idx++ {
 				u := total_users[u_idx]
 				if len(u.BHId) == 0 || len(u.BHToken) == 0 {
@@ -539,27 +550,41 @@ func Upvote_BH(res chan int) {
 					"artId":       {follows[0].ArtId},
 				}
 
-				Multi_BH_UP(get_n_proxy(2), 5, params)
+				UP_Sem.Acquire(ctx, 1)
+				go Multi_BH_UP(get_n_proxy(2), 5, params)
 
 				if should_wait > 3e9 {
 					time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+					sw_mux.Lock()
 					should_wait -= math.Floor(should_wait/1e9) * 1e9
+					sw_mux.Unlock()
 				}
 			}
 
+			UP_Sem.Acquire(ctx, int64(len(total_users)-1))
+			UP_Sem.Release(int64(len(total_users) - 1))
+
 			// handle those failures until it is empty
 			for len(failures) != 0 {
+				failed_users := len(failures)
+				UP_Sem = semaphore.NewWeighted(int64(failed_users))
+
 				// take of the list and empty it
 				tmp := failures
 				failures = nil
 
 				for _, p := range tmp {
-					Multi_BH_UP(get_n_proxy(2), 5, p.params)
+					UP_Sem.Acquire(ctx, 1)
+					go Multi_BH_UP(get_n_proxy(2), 5, p.params)
 					if should_wait > 3e9 {
 						time.Sleep(time.Duration(should_wait/1e9) * time.Second)
+						sw_mux.Lock()
 						should_wait -= math.Floor(should_wait/1e9) * 1e9
+						sw_mux.Unlock()
 					}
 				}
+				UP_Sem.Acquire(ctx, int64(failed_users))
+				UP_Sem.Release(int64(failed_users))
 			}
 
 			if follows[0].UserName != "无闻" {
