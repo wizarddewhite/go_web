@@ -596,6 +596,7 @@ func Upvote_BH(res chan int) {
 			if follows[0].UserName != "无闻" {
 				AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
 			}
+			beego.Trace("\tfinish", follows[0].UserName, "is", follows[0].ArtId)
 		}
 
 		up_voting = false
