@@ -1,6 +1,7 @@
 package models
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
 	"encoding/json"
@@ -595,6 +596,15 @@ func Upvote_BH(res chan int) {
 
 			if follows[0].UserName != "无闻" {
 				AddPost(follows[0].UserName, follows[0].ArtId, follows[0].Title, follows[0].Ups+1)
+
+				p := Post{Id: 1,
+					UserN: follows[0].UserName,
+					ArtId: follows[0].ArtId,
+					Title: follows[0].Title,
+					Ups:   follows[0].Ups + 1}
+				b := new(bytes.Buffer)
+				json.NewEncoder(b).Encode(p)
+				http.Post("http://bihuhelper.tk/update", "application/json; charset=utf-8", b)
 			}
 			beego.Trace("\tfinish", follows[0].UserName, "is", follows[0].ArtId)
 		}
