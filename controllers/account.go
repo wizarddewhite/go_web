@@ -176,6 +176,17 @@ func (this *AccountController) Post() {
 			}
 		}
 
+		if len(pn) != 0 && len(eps) == 0 {
+			ou := models.GetUserByPN(pn)
+			if ou != nil && ou.Name != uname {
+				this.Ctx.SetCookie("flash", "This phone number is already used", 1024, "/")
+				this.Redirect("/account", 301)
+				return
+			}
+			models.ModifyUserPS(uname, pn, eps, "", "")
+			this.Ctx.SetCookie("flash", "BiHu account disconnected", 1024, "/")
+		}
+
 		this.Redirect("/account", 301)
 	}
 

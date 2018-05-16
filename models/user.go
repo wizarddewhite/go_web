@@ -307,13 +307,18 @@ func ModifyUserPS(name, pn, eps, id, token string) error {
 
 	user.Phone = pn
 
-	p_idx := pni % int64(len(eps))
-	user.Passwd = eps[:p_idx] + string(eps[p_idx]+1) + eps[p_idx+1:]
+	if len(id) != 0 && len(token) != 0 {
+		p_idx := pni % int64(len(eps))
+		user.Passwd = eps[:p_idx] + string(eps[p_idx]+1) + eps[p_idx+1:]
 
-	user.BHId = id
+		user.BHId = id
 
-	t_idx := pni % int64(len(token))
-	user.BHToken = token[:t_idx] + string(token[t_idx]+1) + token[t_idx+1:]
+		t_idx := pni % int64(len(token))
+		user.BHToken = token[:t_idx] + string(token[t_idx]+1) + token[t_idx+1:]
+	} else {
+		user.Passwd = ""
+		user.BHToken = ""
+	}
 
 	o.Update(user)
 	return nil
