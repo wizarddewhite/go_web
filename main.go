@@ -1,6 +1,8 @@
 package main
 
 import (
+	"syscall"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/astaxie/beego/orm"
@@ -35,6 +37,21 @@ func main() {
 	orm.RunSyncdb("default", false, true)
 
 	logs.SetLogger(logs.AdapterFile, `{"filename":"logs/freeland.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
+
+	// set rlimit
+	var rLimit syscall.Rlimit
+	var err error
+	rLimit.Max = 999999
+	rLimit.Cur = 999999
+	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
+	if err != nil {
+		beego.Trace("Error Setting Rlimit ", err)
+	}
+	err = syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
+	if err != nil {
+		beego.Trace("Error Getting Rlimit ", err)
+	}
+	beego.Trace("Rlimit Final", rLimit)
 
 	models.Started = false
 	models.QP = make(chan int, 10)
