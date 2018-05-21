@@ -5,7 +5,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"math"
@@ -636,7 +635,11 @@ RefreshUser:
 		"password": {eps},
 	}
 	pid, ptk = BH_Login(machine_ip[len(machine_ip)-1], "", 5, params)
-	fmt.Println(pid, ptk)
+	beego.Trace("get id and token", pid, ptk)
+	if len(pid) == 0 || len(ptk) == 0 {
+		time.Sleep(42 * time.Second)
+		goto RefreshUser
+	}
 
 	refresh_check := time.Now().UTC().Add(time.Hour)
 
