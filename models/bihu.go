@@ -228,7 +228,6 @@ var lastId string
 
 func Mult_Follow(proxy []string, params map[string][]string) {
 	catched := false
-	http_start := time.Now()
 
 	// check last two minute posts
 	post_check := time.Now().UTC().Add(-time.Second * time.Duration(15))
@@ -252,8 +251,6 @@ func Mult_Follow(proxy []string, params map[string][]string) {
 			lid_mux.Unlock()
 		}
 	}
-
-	should_wait += float64(len(proxy))*http_slice - float64(time.Now().UnixNano()-http_start.UnixNano())
 }
 
 func BH_CM(addr, proxy string, to int, params map[string][]string) {
